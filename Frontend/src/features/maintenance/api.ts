@@ -1,5 +1,5 @@
 import { apiRequest } from '@/lib/api-client';
-import type { MaintenanceRequest, MaintenanceStatus, MaintenancePriority } from '@/types/domain.types';
+import type { MaintenanceRequest, MaintenanceStatus, MaintenancePriority, Approval } from '@/types/domain.types';
 
 export interface MaintenanceSearchParams {
   page?: number;
@@ -45,4 +45,8 @@ export function updateMaintenanceStatus(id: string, payload: UpdateMaintenanceSt
 
 export function getMaintenanceStatusCounts() {
   return apiRequest<Record<string, number>>('/maintenance/status-counts');
+}
+
+export function getMaintenanceApproval(id: string) {
+  return apiRequest<Approval | null>(`/maintenance/${id}/approval`);
 }

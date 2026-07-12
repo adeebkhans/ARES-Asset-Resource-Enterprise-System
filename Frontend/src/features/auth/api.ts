@@ -39,3 +39,7 @@ export function fetchMe() {
 export function logout(refreshToken: string) {
   return apiRequest<{ loggedOut: boolean }>('/auth/logout', { method: 'POST', body: { refreshToken }, auth: false });
 }
+
+export function refresh(refreshToken: string) {
+  return apiRequest<{ accessToken: string; refreshToken: string }>('/auth/refresh', { method: 'POST', body: { refreshToken }, auth: false });
+}

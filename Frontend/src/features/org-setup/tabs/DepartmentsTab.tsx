@@ -6,13 +6,15 @@ import { Modal } from '@/components/ui/Modal';
 import { StatusBadge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ApiRequestError } from '@/types/api.types';
-import { listDepartments, createDepartment, deleteDepartment } from '@/features/departments/api';
+import { listDepartments, createDepartment, updateDepartment, deleteDepartment } from '@/features/departments/api';
 import type { Department } from '@/types/domain.types';
 
 export function DepartmentsTab() {
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
+  const [editDept, setEditDept] = useState<Department | null>(null);
   const [newName, setNewName] = useState('');
+  const [editName, setEditName] = useState('');
   const [error, setError] = useState('');
 
   const { data: departments = [], isLoading } = useQuery({
@@ -30,6 +32,19 @@ export function DepartmentsTab() {
     },
     onError: (err) => {
       setError(err instanceof ApiRequestError ? err.message : 'Failed to create department');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) => updateDepartment(id, { name }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['departments'] });
+      setEditDept(null);
+      setEditName('');
+      setError('');
+    },
+    onError: (err) => {
+      setError(err instanceof ApiRequestError ? err.message : 'Failed to update department');
     },
   });
 
@@ -75,13 +90,21 @@ export function DepartmentsTab() {
                   </td>
                   <td className="py-2"><StatusBadge status={dept.status} /></td>
                   <td className="py-2 text-right">
-                    <Button
-                      variant="secondary"
-                      onClick={() => deleteMutation.mutate(dept.id)}
-                      isLoading={deleteMutation.isPending}
-                    >
-                      Deactivate
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="secondary"
+                        onClick={() => { setEditDept(dept); setEditName(dept.name); setError(''); }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => deleteMutation.mutate(dept.id)}
+                        isLoading={deleteMutation.isPending}
+                      >
+                        Deactivate
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -107,6 +130,25 @@ export function DepartmentsTab() {
           />
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" isLoading={createMutation.isPending}>Create</Button>
+        </form>
+      </Modal>
+
+      <Modal open={!!editDept} onClose={() => setEditDept(null)} title={`Edit Department — ${editDept?.name}`}>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!editDept || !editName.trim()) return;
+            updateMutation.mutate({ id: editDept.id, name: editName.trim() });
+          }}
+        >
+          <Input
+            label="Department name"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+          />
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <Button type="submit" isLoading={updateMutation.isPending}>Save Changes</Button>
         </form>
       </Modal>
     </div>

@@ -12,7 +12,7 @@ import { StatusBadge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { DynamicFieldInput } from '@/components/dynamic-form/DynamicForm';
 import { ApiRequestError } from '@/types/api.types';
-import { searchAssets, createAsset, getAssetStatusCounts } from '@/features/assets/api';
+import { searchAssets, createAsset, getAssetStatusCounts, transitionAssetStatus } from '@/features/assets/api';
 import { listCategories } from '@/features/asset-categories/api';
 import { listCategoryFields } from '@/features/custom-objects/api';
 import type { Asset, AssetStatus, AssetCategory } from '@/types/domain.types';
@@ -50,6 +50,33 @@ const STATUS_TONE: Record<string, string> = {
   LOST: 'bg-red-500',
   RETIRED: 'bg-ink-400',
   DISPOSED: 'bg-ink-400',
+};
+
+const VALID_TRANSITIONS: Record<string, { event: string; label: string }[]> = {
+  AVAILABLE: [
+    { event: 'allocate', label: 'Allocate' },
+    { event: 'reserve', label: 'Reserve' },
+    { event: 'retire', label: 'Retire' },
+  ],
+  ALLOCATED: [
+    { event: 'return', label: 'Return' },
+    { event: 'retire', label: 'Retire' },
+  ],
+  RESERVED: [
+    { event: 'confirm_reservation', label: 'Confirm' },
+    { event: 'retire', label: 'Retire' },
+  ],
+  UNDER_MAINTENANCE: [
+    { event: 'resolve_maintenance', label: 'Resolve' },
+    { event: 'retire', label: 'Retire' },
+  ],
+  LOST: [
+    { event: 'recover', label: 'Recover' },
+    { event: 'retire', label: 'Retire' },
+  ],
+  RETIRED: [
+    { event: 'dispose', label: 'Dispose' },
+  ],
 };
 
 export function AssetsPage() {
@@ -91,6 +118,14 @@ export function AssetsPage() {
     },
     onError: (err) => {
       setError(err instanceof ApiRequestError ? err.message : 'Failed to create asset');
+    },
+  });
+
+  const transitionMutation = useMutation({
+    mutationFn: ({ id, event }: { id: string; event: string }) => transitionAssetStatus(id, event),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assets'] });
+      queryClient.invalidateQueries({ queryKey: ['asset-status-counts'] });
     },
   });
 
@@ -191,6 +226,7 @@ export function AssetsPage() {
                   <th className="px-5 py-3 font-medium text-ink-500">Location</th>
                   <th className="px-5 py-3 font-medium text-ink-500">Status</th>
                   <th className="px-5 py-3 font-medium text-ink-500">Shared</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
@@ -202,6 +238,19 @@ export function AssetsPage() {
                     <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">{asset.location ?? '—'}</td>
                     <td className="px-5 py-2.5"><StatusBadge status={asset.status} /></td>
                     <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">{asset.isShared ? 'Yes' : 'No'}</td>
+                    <td className="px-5 py-2.5">
+                      <div className="flex gap-1">
+                        {(VALID_TRANSITIONS[asset.status] ?? []).map((t) => (
+                          <button
+                            key={t.event}
+                            onClick={() => transitionMutation.mutate({ id: asset.id, event: t.event })}
+                            className="rounded bg-ink-100 px-2 py-0.5 text-xs font-medium text-ink-700 transition-colors hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700"
+                          >
+                            {t.label}
+                          </button>
+                        ))}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

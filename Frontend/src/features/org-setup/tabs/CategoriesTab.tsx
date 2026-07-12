@@ -5,14 +5,17 @@ import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ApiRequestError } from '@/types/api.types';
-import { listCategories, createCategory, deleteCategory } from '@/features/asset-categories/api';
+import { listCategories, createCategory, updateCategory, deleteCategory } from '@/features/asset-categories/api';
 import type { AssetCategory } from '@/types/domain.types';
 
 export function CategoriesTab() {
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
+  const [editCat, setEditCat] = useState<AssetCategory | null>(null);
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
+  const [editName, setEditName] = useState('');
+  const [editDesc, setEditDesc] = useState('');
   const [error, setError] = useState('');
 
   const { data: categories = [], isLoading } = useQuery({
@@ -31,6 +34,21 @@ export function CategoriesTab() {
     },
     onError: (err) => {
       setError(err instanceof ApiRequestError ? err.message : 'Failed to create category');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, name, description }: { id: string; name?: string; description?: string | null }) =>
+      updateCategory(id, { name, description }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['asset-categories'] });
+      setEditCat(null);
+      setEditName('');
+      setEditDesc('');
+      setError('');
+    },
+    onError: (err) => {
+      setError(err instanceof ApiRequestError ? err.message : 'Failed to update category');
     },
   });
 
@@ -70,13 +88,21 @@ export function CategoriesTab() {
                   <td className="py-2 text-ink-600 dark:text-ink-400">{cat.description ?? '—'}</td>
                   <td className="py-2 text-ink-600 dark:text-ink-400">{cat._count?.assets ?? 0}</td>
                   <td className="py-2 text-right">
-                    <Button
-                      variant="secondary"
-                      onClick={() => deleteMutation.mutate(cat.id)}
-                      isLoading={deleteMutation.isPending}
-                    >
-                      Delete
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="secondary"
+                        onClick={() => { setEditCat(cat); setEditName(cat.name); setEditDesc(cat.description ?? ''); setError(''); }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => deleteMutation.mutate(cat.id)}
+                        isLoading={deleteMutation.isPending}
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -94,20 +120,30 @@ export function CategoriesTab() {
             createMutation.mutate({ name: newName.trim(), description: newDesc.trim() || undefined });
           }}
         >
-          <Input
-            label="Category name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="e.g. Electronics"
-          />
-          <Input
-            label="Description (optional)"
-            value={newDesc}
-            onChange={(e) => setNewDesc(e.target.value)}
-            placeholder="e.g. Laptops, monitors, peripherals"
-          />
+          <Input label="Category name" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Electronics" />
+          <Input label="Description (optional)" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="e.g. Laptops, monitors, peripherals" />
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" isLoading={createMutation.isPending}>Create</Button>
+        </form>
+      </Modal>
+
+      <Modal open={!!editCat} onClose={() => setEditCat(null)} title={`Edit Category — ${editCat?.name}`}>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!editCat) return;
+            updateMutation.mutate({
+              id: editCat.id,
+              name: editName.trim() || undefined,
+              description: editDesc.trim() || null,
+            });
+          }}
+        >
+          <Input label="Category name" value={editName} onChange={(e) => setEditName(e.target.value)} />
+          <Input label="Description" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <Button type="submit" isLoading={updateMutation.isPending}>Save Changes</Button>
         </form>
       </Modal>
     </div>

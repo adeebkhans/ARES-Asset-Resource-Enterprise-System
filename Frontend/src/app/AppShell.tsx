@@ -35,7 +35,11 @@ interface NavItem {
 const NAV_SECTIONS: { heading: string; items: NavItem[] }[] = [
   {
     heading: 'Overview',
-    items: [{ to: '/dashboard', label: 'Dashboard', icon: '📊' }],
+    items: [
+      { to: '/dashboard', label: 'Dashboard', icon: '📊' },
+      { to: '/reports', label: 'Reports', icon: '📈', adminOnly: true },
+      { to: '/activity-logs', label: 'Activity Log', icon: '📋', adminOnly: true },
+    ],
   },
   {
     heading: 'Operations',
