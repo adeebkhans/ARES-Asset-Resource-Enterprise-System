@@ -3,12 +3,12 @@ import clsx from 'clsx';
 type BadgeVariant = 'default' | 'success' | 'warning' | 'danger' | 'info' | 'brand';
 
 const BADGE_STYLES: Record<BadgeVariant, string> = {
-  default: 'bg-ink-100 text-ink-700 dark:bg-ink-800 dark:text-ink-300',
-  success: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-  warning: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  danger: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  info: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400',
-  brand: 'bg-brand-100 text-brand-800 dark:bg-brand-900/30 dark:text-brand-300',
+  default: 'bg-recessed text-label shadow-[inset_2px_2px_4px_#babecc,inset_-2px_-2px_4px_#ffffff]',
+  success: 'bg-emerald-100 text-emerald-700 shadow-[inset_2px_2px_4px_rgba(34,197,94,0.15),inset_-2px_-2px_4px_rgba(255,255,255,0.5)]',
+  warning: 'bg-amber-100 text-amber-700 shadow-[inset_2px_2px_4px_rgba(255,165,2,0.15),inset_-2px_-2px_4px_rgba(255,255,255,0.5)]',
+  danger: 'bg-red-100 text-red-700 shadow-[inset_2px_2px_4px_rgba(255,71,87,0.15),inset_-2px_-2px_4px_rgba(255,255,255,0.5)]',
+  info: 'bg-sky-100 text-sky-700 shadow-[inset_2px_2px_4px_rgba(30,144,255,0.15),inset_-2px_-2px_4px_rgba(255,255,255,0.5)]',
+  brand: 'bg-red-100 text-red-700 shadow-[inset_2px_2px_4px_rgba(255,71,87,0.15),inset_-2px_-2px_4px_rgba(255,255,255,0.5)]',
 };
 
 interface BadgeProps {
@@ -21,7 +21,7 @@ export function Badge({ variant = 'default', children, className }: BadgeProps) 
   return (
     <span
       className={clsx(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold tracking-wide',
+        'inline-flex items-center rounded-full px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest',
         BADGE_STYLES[variant],
         className,
       )}

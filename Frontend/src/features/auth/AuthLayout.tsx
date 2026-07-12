@@ -1,9 +1,9 @@
 import type { PropsWithChildren } from 'react';
 
 const FEATURES = [
-  { icon: '🧩', text: 'Model any entity your business needs — not just Assets' },
-  { icon: '🔁', text: 'Full lifecycle tracking, from registration to disposal' },
-  { icon: '✅', text: 'Approval workflows that escalate themselves' },
+  { icon: 'puzzle-piece', text: 'Model any entity your business needs — not just Assets' },
+  { icon: 'arrows-clockwise', text: 'Full lifecycle tracking, from registration to disposal' },
+  { icon: 'check-circle', text: 'Approval workflows that escalate themselves' },
 ];
 
 /** Shared chrome for the three unauthenticated auth screens — a brand panel plus the form. */
@@ -33,7 +33,7 @@ export function AuthLayout({ children }: PropsWithChildren) {
           <ul className="mt-8 flex flex-col gap-4">
             {FEATURES.map((f) => (
               <li key={f.text} className="flex items-start gap-3 text-sm text-brand-50/90">
-                <span className="text-lg">{f.icon}</span>
+                <i className={`ph-bold ph-${f.icon}`} />
                 <span>{f.text}</span>
               </li>
             ))}

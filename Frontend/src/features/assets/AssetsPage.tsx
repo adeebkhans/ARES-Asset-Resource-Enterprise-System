@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
@@ -15,6 +16,7 @@ import { ApiRequestError } from '@/types/api.types';
 import { searchAssets, createAsset, getAssetStatusCounts, transitionAssetStatus } from '@/features/assets/api';
 import { listCategories } from '@/features/asset-categories/api';
 import { listCategoryFields } from '@/features/custom-objects/api';
+import { useAuthStore } from '@/store/auth.store';
 import type { Asset, AssetStatus, AssetCategory } from '@/types/domain.types';
 
 const createAssetSchema = z.object({
@@ -81,6 +83,13 @@ const VALID_TRANSITIONS: Record<string, { event: string; label: string }[]> = {
 
 export function AssetsPage() {
   const queryClient = useQueryClient();
+  const role = useAuthStore((s) => s.user?.role);
+  // Mirrors the backend's role gates: POST /assets and PATCH transitions are
+  // ADMIN/ASSET_MANAGER(/DEPARTMENT_HEAD for transitions) only — showing these
+  // controls to roles that would just get a 403 is its own kind of bug.
+  const canRegister = role === 'ADMIN' || role === 'ASSET_MANAGER';
+  const canTransition = role === 'ADMIN' || role === 'ASSET_MANAGER' || role === 'DEPARTMENT_HEAD';
+
   const [showCreate, setShowCreate] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -107,6 +116,7 @@ export function AssetsPage() {
   });
 
   const categoryOptions = (categories as AssetCategory[]).map((c) => ({ value: c.id, label: c.name }));
+  const hasNoCategories = categoryOptions.length === 0;
 
   const createMutation = useMutation({
     mutationFn: createAsset,
@@ -161,10 +171,12 @@ export function AssetsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-ink-900 dark:text-white">Assets</h1>
+          <h1 className="font-display text-2xl font-semibold text-ink-900 text-black">Assets</h1>
           <p className="text-sm text-ink-500">Register, search, and manage your organization's assets.</p>
         </div>
-        <Button onClick={() => { setShowCreate(true); setError(''); reset(); }}>+ Register Asset</Button>
+        {canRegister && (
+          <Button onClick={() => { setShowCreate(true); setError(''); reset(); }}>+ Register Asset</Button>
+        )}
       </div>
 
       {statusCounts && (
@@ -172,7 +184,7 @@ export function AssetsPage() {
           {Object.entries(statusCounts as Record<string, number>).map(([status, count]) => (
             <Card key={status} className="relative overflow-hidden py-4">
               <span className={`absolute inset-x-0 top-0 h-1 ${STATUS_TONE[status] ?? 'bg-ink-300'}`} />
-              <span className="block text-2xl font-bold text-ink-900 dark:text-white">{count}</span>
+              <span className="block text-2xl font-bold text-ink-900 text-black">{count}</span>
               <span className="text-xs font-medium text-ink-500">{status.replace(/_/g, ' ')}</span>
             </Card>
           ))}
@@ -207,10 +219,10 @@ export function AssetsPage() {
 
       {!isLoading && assets.length === 0 && (
         <EmptyState
-          icon="📦"
+          icon="package"
           title="No assets found"
           description={search || statusFilter || categoryFilter ? 'Try clearing your filters.' : 'Register your first asset to start tracking it through its lifecycle.'}
-          action={!search && !statusFilter && !categoryFilter ? <Button onClick={() => setShowCreate(true)}>Register Asset</Button> : undefined}
+          action={canRegister && !search && !statusFilter && !categoryFilter ? <Button onClick={() => setShowCreate(true)}>Register Asset</Button> : undefined}
         />
       )}
 
@@ -226,31 +238,33 @@ export function AssetsPage() {
                   <th className="px-5 py-3 font-medium text-ink-500">Location</th>
                   <th className="px-5 py-3 font-medium text-ink-500">Status</th>
                   <th className="px-5 py-3 font-medium text-ink-500">Shared</th>
-                  <th className="px-5 py-3 font-medium text-ink-500">Actions</th>
+                  {canTransition && <th className="px-5 py-3 font-medium text-ink-500">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
                 {assets.map((asset: Asset) => (
                   <tr key={asset.id} className="transition-colors hover:bg-ink-50/70 dark:hover:bg-ink-800/40">
                     <td className="px-5 py-2.5 font-mono text-xs text-brand-700 dark:text-brand-400">{asset.assetTag}</td>
-                    <td className="px-5 py-2.5 font-medium text-ink-900 dark:text-white">{asset.name}</td>
+                    <td className="px-5 py-2.5 font-medium text-ink-900 text-black">{asset.name}</td>
                     <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">{asset.category?.name ?? '—'}</td>
                     <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">{asset.location ?? '—'}</td>
                     <td className="px-5 py-2.5"><StatusBadge status={asset.status} /></td>
                     <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">{asset.isShared ? 'Yes' : 'No'}</td>
-                    <td className="px-5 py-2.5">
-                      <div className="flex gap-1">
-                        {(VALID_TRANSITIONS[asset.status] ?? []).map((t) => (
-                          <button
-                            key={t.event}
-                            onClick={() => transitionMutation.mutate({ id: asset.id, event: t.event })}
-                            className="rounded bg-ink-100 px-2 py-0.5 text-xs font-medium text-ink-700 transition-colors hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700"
-                          >
-                            {t.label}
-                          </button>
-                        ))}
-                      </div>
-                    </td>
+                    {canTransition && (
+                      <td className="px-5 py-2.5">
+                        <div className="flex gap-1">
+                          {(VALID_TRANSITIONS[asset.status] ?? []).map((t) => (
+                            <button
+                              key={t.event}
+                              onClick={() => transitionMutation.mutate({ id: asset.id, event: t.event })}
+                              className="rounded bg-ink-100 px-2 py-0.5 text-xs font-medium text-ink-700 transition-colors hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700"
+                            >
+                              {t.label}
+                            </button>
+                          ))}
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -260,45 +274,58 @@ export function AssetsPage() {
       )}
 
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Register New Asset">
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
-          <Input label="Asset Name" error={formErrors.name?.message} {...register('name')} />
-          <Select
-            label="Category"
-            options={categoryOptions}
-            placeholder="Select a category"
-            error={formErrors.categoryId?.message}
-            {...register('categoryId')}
-          />
-          <Input label="Serial Number (optional)" {...register('serialNumber')} />
-          <Input label="Condition (optional)" placeholder="e.g. New, Good, Fair" {...register('condition')} />
-          <Input label="Location (optional)" placeholder="e.g. Building A, Room 302" {...register('location')} />
-          <div className="flex items-center gap-2">
-            <input type="checkbox" id="isShared" className="rounded" {...register('isShared')} />
-            <label htmlFor="isShared" className="text-sm text-ink-700 dark:text-ink-300">
-              Bookable (shared resource)
-            </label>
+        {hasNoCategories ? (
+          <div className="flex flex-col items-center gap-3 py-4 text-center">
+            <i className="ph-bold ph-tag text-3xl text-ink-400" />
+            <p className="text-sm font-medium text-ink-900 dark:text-white">You need an Asset Category first</p>
+            <p className="text-sm text-ink-500">
+              Assets are always registered under a category (e.g. "Electronics", "Vehicles"). Create one before registering your first asset.
+            </p>
+            <Link to="/org-setup?tab=categories" onClick={() => setShowCreate(false)}>
+              <Button>Go to Asset Categories</Button>
+            </Link>
           </div>
-
-          {selectedCategoryId && categoryFields.length > 0 && (
-            <div className="flex flex-col gap-4 rounded-xl border border-dashed border-brand-300 bg-brand-50/40 p-4 dark:border-brand-800 dark:bg-brand-900/10">
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-700 dark:text-brand-400">
-                {categoryOptions.find((c) => c.value === selectedCategoryId)?.label} fields
-              </p>
-              {categoryFields.map((def) => (
-                <DynamicFieldInput
-                  key={def.id}
-                  def={def}
-                  name={`customFieldValues.${def.fieldKey}`}
-                  register={register}
-                  control={control}
-                />
-              ))}
+        ) : (
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+            <Input label="Asset Name" error={formErrors.name?.message} {...register('name')} />
+            <Select
+              label="Category"
+              options={categoryOptions}
+              placeholder="Select a category"
+              error={formErrors.categoryId?.message}
+              {...register('categoryId')}
+            />
+            <Input label="Serial Number (optional)" {...register('serialNumber')} />
+            <Input label="Condition (optional)" placeholder="e.g. New, Good, Fair" {...register('condition')} />
+            <Input label="Location (optional)" placeholder="e.g. Building A, Room 302" {...register('location')} />
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="isShared" className="rounded" {...register('isShared')} />
+              <label htmlFor="isShared" className="text-sm text-ink-700 dark:text-ink-300">
+                Bookable (shared resource)
+              </label>
             </div>
-          )}
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <Button type="submit" isLoading={createMutation.isPending}>Register Asset</Button>
-        </form>
+            {selectedCategoryId && categoryFields.length > 0 && (
+              <div className="flex flex-col gap-4 rounded-xl border border-dashed border-brand-300 bg-brand-50/40 p-4 dark:border-brand-800 dark:bg-brand-900/10">
+                <p className="text-xs font-semibold uppercase tracking-wide text-brand-700 dark:text-brand-400">
+                  {categoryOptions.find((c) => c.value === selectedCategoryId)?.label} fields
+                </p>
+                {categoryFields.map((def) => (
+                  <DynamicFieldInput
+                    key={def.id}
+                    def={def}
+                    name={`customFieldValues.${def.fieldKey}`}
+                    register={register}
+                    control={control}
+                  />
+                ))}
+              </div>
+            )}
+
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            <Button type="submit" isLoading={createMutation.isPending}>Register Asset</Button>
+          </form>
+        )}
       </Modal>
     </div>
   );

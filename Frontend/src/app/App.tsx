@@ -39,8 +39,10 @@ export function App() {
               <Route path="/custom-objects/:id" element={<CustomObjectDetailPage />} />
               <Route path="/reports" element={<ReportsPage />} />
               <Route path="/activity-logs" element={<ActivityLogsPage />} />
-              {/* Organization Setup is Admin-only per the brief — Departments/Categories/Employee Directory. */}
-              <Route element={<RequireRole roles={['ADMIN']} />}>
+              {/* Departments/Employee Directory/Templates are Admin-only per the brief; Asset Manager
+                  also gets in because they hold backend permission to manage Asset Categories
+                  (OrgSetupPage itself hides the other tabs for non-admins). */}
+              <Route element={<RequireRole roles={['ADMIN', 'ASSET_MANAGER']} />}>
                 <Route path="/org-setup" element={<OrgSetupPage />} />
               </Route>
             </Route>

@@ -63,7 +63,7 @@ export function DepartmentsTab() {
       {isLoading && <p className="text-sm text-ink-500">Loading...</p>}
 
       {!isLoading && departments.length === 0 && (
-        <EmptyState icon="🏢" title="No departments yet" description="Create your first department to start organizing employees." action={<Button onClick={() => setShowCreate(true)}>Add Department</Button>} />
+        <EmptyState icon="buildings" title="No departments yet" description="Create your first department to start organizing employees." action={<Button onClick={() => setShowCreate(true)}>Add Department</Button>} />
       )}
 
       {departments.length > 0 && (
@@ -81,7 +81,7 @@ export function DepartmentsTab() {
             <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
               {departments.map((dept: Department) => (
                 <tr key={dept.id}>
-                  <td className="py-2 font-medium text-ink-900 dark:text-white">{dept.name}</td>
+                  <td className="py-2 font-medium text-ink-900 text-black">{dept.name}</td>
                   <td className="py-2 text-ink-600 dark:text-ink-400">
                     {dept.head?.name ?? '—'}
                   </td>

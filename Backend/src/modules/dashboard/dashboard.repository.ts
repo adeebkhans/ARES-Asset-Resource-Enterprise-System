@@ -29,7 +29,7 @@ export interface DashboardKpis {
     action: string;
     entityType: string;
     entityId: string;
-    userName: string | null;
+    user: { id: string; name: string } | null;
     timestamp: Date;
   }[];
 }
@@ -80,6 +80,7 @@ export class DashboardRepository {
           entityType: true,
           entityId: true,
           timestamp: true,
+          userId: true,
         },
       }),
     ]);
@@ -88,6 +89,12 @@ export class DashboardRepository {
     for (const row of assetCounts) {
       assetMap[row.status] = row._count.id;
     }
+
+    // ActivityLog.userId has no FK to User (it's a plain string so entries
+    // survive user deletion), so the actor has to be resolved separately.
+    const actorIds = [...new Set(recentActivity.map((a) => a.userId))];
+    const actors = await prisma.user.findMany({ where: { id: { in: actorIds } }, select: { id: true, name: true } });
+    const actorById = new Map(actors.map((u) => [u.id, u]));
 
     return {
       role: 'ADMIN',
@@ -112,8 +119,12 @@ export class DashboardRepository {
         unread: unreadCount,
       },
       recentActivity: recentActivity.map((a) => ({
-        ...a,
-        userName: null,
+        id: a.id,
+        action: a.action,
+        entityType: a.entityType,
+        entityId: a.entityId,
+        timestamp: a.timestamp,
+        user: actorById.get(a.userId) ?? null,
       })),
     };
   }

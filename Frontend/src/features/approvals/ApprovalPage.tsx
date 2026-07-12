@@ -69,7 +69,12 @@ const ruleSchema = z.object({
   escalateToRole: z.string().min(1, 'Escalation role is required'),
 });
 
-type RuleForm = z.infer<typeof ruleSchema>;
+// z.coerce.number() has a narrower output type (number) than input type
+// (unknown, since it accepts strings from the form before coercing). RHF's
+// third useForm generic (TTransformedValues) lets handleSubmit's callback
+// still receive the coerced output type while the form itself holds input.
+type RuleForm = z.input<typeof ruleSchema>;
+type RuleFormOutput = z.output<typeof ruleSchema>;
 
 export function ApprovalPage() {
   const queryClient = useQueryClient();
@@ -193,7 +198,7 @@ export function ApprovalPage() {
     handleSubmit: handleSubmitRule,
     reset: resetRule,
     formState: { errors: ruleErrors },
-  } = useForm<RuleForm>({ resolver: zodResolver(ruleSchema) });
+  } = useForm<RuleForm, unknown, RuleFormOutput>({ resolver: zodResolver(ruleSchema) });
 
   const onSubmitDecide = (data: DecideForm) => {
     if (!decideId) return;
@@ -219,7 +224,7 @@ export function ApprovalPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-ink-900 dark:text-white">Approvals</h1>
+        <h1 className="font-display text-2xl font-semibold text-ink-900 text-black">Approvals</h1>
         <p className="text-sm text-ink-500">Review and manage approval requests across the organization.</p>
       </div>
 
@@ -227,7 +232,7 @@ export function ApprovalPage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {Object.entries(statusCounts as Record<string, number>).map(([status, count]) => (
             <Card key={status} className="flex flex-col items-center gap-1 py-3">
-              <span className="font-display text-2xl font-bold text-ink-900 dark:text-white">{count}</span>
+              <span className="font-display text-2xl font-bold text-ink-900 text-black">{count}</span>
               <span className="text-xs text-ink-500">{status.replace(/_/g, ' ')}</span>
             </Card>
           ))}
@@ -268,7 +273,7 @@ export function ApprovalPage() {
       {/* ── Approvals Table ──────────────────────────────────────────── */}
       {(activeTab === 'pending' || activeTab === 'all') && !isLoading && approvals.length === 0 && (
         <EmptyState
-          icon="✅"
+          icon="check-circle"
           title={activeTab === 'pending' ? 'Nothing waiting on you' : 'No approvals found'}
           description={activeTab === 'pending' ? "You're all caught up." : 'Approval requests from other modules will show up here.'}
         />
@@ -344,7 +349,7 @@ export function ApprovalPage() {
             <Button onClick={() => { setShowDelegation(true); setError(''); resetDelegation(); }}>+ New Delegation</Button>
           </div>
           {delegations.length === 0 ? (
-            <EmptyState icon="🔄" title="No delegations" description="Set up a delegation to let someone else handle your approvals while you're away." />
+            <EmptyState icon="arrows-clockwise" title="No delegations" description="Set up a delegation to let someone else handle your approvals while you're away." />
           ) : (
             <Card className="p-0">
               <div className="overflow-x-auto">
@@ -366,7 +371,7 @@ export function ApprovalPage() {
                       const isActive = d.active && start <= now && now <= end;
                       return (
                         <tr key={d.id}>
-                          <td className="px-5 py-2.5 font-medium text-ink-900 dark:text-white">{d.delegate?.name ?? d.delegateUserId}</td>
+                          <td className="px-5 py-2.5 font-medium text-ink-900 text-black">{d.delegate?.name ?? d.delegateUserId}</td>
                           <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">{start.toLocaleDateString()}</td>
                           <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">{end.toLocaleDateString()}</td>
                           <td className="px-5 py-2.5">

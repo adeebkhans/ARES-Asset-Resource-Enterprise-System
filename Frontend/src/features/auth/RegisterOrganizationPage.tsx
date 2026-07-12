@@ -46,7 +46,7 @@ export function RegisterOrganizationPage() {
   return (
     <AuthLayout>
       <Card>
-        <h1 className="mb-1 font-display text-2xl font-semibold text-ink-900 dark:text-white">Set up your organization</h1>
+        <h1 className="mb-1 font-display text-2xl font-semibold text-ink-900 text-black">Set up your organization</h1>
         <p className="mb-6 text-sm text-ink-500">You'll be the Admin for this organization.</p>
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit((values) => mutation.mutate(values))}>

@@ -7,13 +7,14 @@ interface EmptyStateProps {
   action?: ReactNode;
 }
 
-/** Consistent empty-state treatment — every list page hits this at least once (a fresh org has nothing in it). */
-export function EmptyState({ icon = '📭', title, description, action }: EmptyStateProps) {
+export function EmptyState({ icon = 'ph-tray', title, description, action }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-ink-300 bg-ink-50/50 px-6 py-16 text-center dark:border-ink-700 dark:bg-ink-900/40">
-      <span className="text-4xl">{icon}</span>
-      <h3 className="font-display text-lg font-semibold text-ink-900 dark:text-white">{title}</h3>
-      {description && <p className="max-w-sm text-sm text-ink-500">{description}</p>}
+    <div className="flex flex-col items-center gap-4 rounded-2xl bg-chassis p-16 text-center" style={{ boxShadow: 'inset 4px 4px 8px #babecc, inset -4px -4px 8px #ffffff' }}>
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-chassis" style={{ boxShadow: 'inset 4px 4px 8px #babecc, inset -4px -4px 8px #ffffff' }}>
+        <i className={`ph ${icon}`} style={{ fontSize: 28, color: '#4a5568' }} />
+      </div>
+      <h3 className="font-mono text-sm font-bold uppercase tracking-widest text-ink">{title}</h3>
+      {description && <p className="max-w-sm text-sm text-label">{description}</p>}
       {action && <div className="mt-2">{action}</div>}
     </div>
   );

@@ -168,7 +168,7 @@ export function AuditPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-ink-900 dark:text-white">Audits</h1>
+          <h1 className="font-display text-2xl font-semibold text-ink-900 text-black">Audits</h1>
           <p className="text-sm text-ink-500">Plan audit cycles, assign auditors, and track discrepancies.</p>
         </div>
         <Button onClick={() => { setShowCreate(true); setError(''); resetCreate(); }}>+ Create Cycle</Button>
@@ -178,7 +178,7 @@ export function AuditPage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3">
           {Object.entries(statusCounts as Record<string, number>).map(([status, count]) => (
             <Card key={status} className="flex flex-col items-center gap-1 py-3">
-              <span className="font-display text-2xl font-bold text-ink-900 dark:text-white">{count}</span>
+              <span className="font-display text-2xl font-bold text-ink-900 text-black">{count}</span>
               <span className="text-xs text-ink-500">{status.replace(/_/g, ' ')}</span>
             </Card>
           ))}
@@ -219,7 +219,7 @@ export function AuditPage() {
 
       {!isTabLoading && displayCycles.length === 0 && (
         <EmptyState
-          icon="🔍"
+          icon="magnifying-glass"
           title={activeTab === 'my-assignments' ? 'No assignments' : 'No audit cycles'}
           description={activeTab === 'my-assignments' ? "You haven't been assigned to any audit cycles yet." : "Create a cycle to start verifying assets against their expected state."}
         />
@@ -335,7 +335,7 @@ export function AuditPage() {
               <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
                 {records.map((rec: AuditRecord) => (
                   <tr key={rec.id}>
-                    <td className="py-2 font-medium text-ink-900 dark:text-white">
+                    <td className="py-2 font-medium text-ink-900 text-black">
                       {rec.asset?.name ?? rec.assetId}
                     </td>
                     <td className="py-2"><StatusBadge status={rec.result} /></td>

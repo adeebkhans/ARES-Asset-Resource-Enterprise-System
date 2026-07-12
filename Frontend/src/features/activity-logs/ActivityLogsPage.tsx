@@ -44,7 +44,7 @@ export function ActivityLogsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-ink-900 dark:text-white">Activity Log</h1>
+        <h1 className="font-display text-2xl font-semibold text-ink-900 text-black">Activity Log</h1>
         <p className="text-sm text-ink-500">Audit trail of all system actions</p>
       </div>
 
@@ -69,7 +69,7 @@ export function ActivityLogsPage() {
 
       {!isLoading && logs.length === 0 && (
         <EmptyState
-          icon="📋"
+          icon="clock-counter-clockwise"
           title="No activity logs"
           description={entityType || entityId ? 'Try clearing your filters.' : 'Actions will appear here as users interact with the system.'}
         />
@@ -92,7 +92,7 @@ export function ActivityLogsPage() {
                 {logs.map((log: ActivityLog) => (
                   <tr key={log.id} className="hover:bg-ink-50 dark:hover:bg-ink-800/50">
                     <td className="px-5 py-2.5 text-ink-500">{getTimeAgo(log.timestamp)}</td>
-                    <td className="px-5 py-2.5 font-medium text-ink-900 dark:text-white">{log.action}</td>
+                    <td className="px-5 py-2.5 font-medium text-ink-900 text-black">{log.action}</td>
                     <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">{log.entityType}</td>
                     <td className="px-5 py-2.5 font-mono text-xs text-ink-500">{log.entityId.slice(0, 8)}…</td>
                     <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">{log.userId.slice(0, 8)}…</td>
