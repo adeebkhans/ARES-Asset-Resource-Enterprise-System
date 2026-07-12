@@ -173,3 +173,51 @@ export interface Notification {
   isRead: boolean;
   createdAt: string;
 }
+
+// ---------------------------------------------------------------------------
+// Phase 4 — Approvals
+// ---------------------------------------------------------------------------
+
+export type ApprovalType = 'MAINTENANCE' | 'TRANSFER' | 'AUDIT_DISCREPANCY' | 'CUSTOM';
+export type ApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'ESCALATED';
+
+export interface Approval {
+  id: string;
+  orgId: string;
+  type: ApprovalType;
+  entityType: string;
+  entityId: string;
+  requestedById: string;
+  currentApproverUserId: string | null;
+  status: ApprovalStatus;
+  dueAt: string;
+  escalatedAt: string | null;
+  decidedById: string | null;
+  decidedAt: string | null;
+  comment: string | null;
+  createdAt: string;
+  requestedBy?: { id: string; name: string } | null;
+  currentApprover?: { id: string; name: string } | null;
+  decidedBy?: { id: string; name: string } | null;
+}
+
+export interface ApprovalRule {
+  id: string;
+  orgId: string;
+  approvalType: ApprovalType;
+  slaHours: number;
+  escalateToRole: string;
+  createdBy: string;
+}
+
+export interface ApprovalDelegation {
+  id: string;
+  orgId: string;
+  delegatorUserId: string;
+  delegateUserId: string;
+  startDate: string;
+  endDate: string;
+  active: boolean;
+  delegate?: { id: string; name: string };
+  delegator?: { id: string; name: string };
+}

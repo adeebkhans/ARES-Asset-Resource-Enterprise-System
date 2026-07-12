@@ -39,6 +39,7 @@ const STATUS_BADGE: Record<string, BadgeVariant> = {
   PENDING: 'warning',
   APPROVED: 'success',
   REJECTED: 'danger',
+  ESCALATED: 'warning',
   IN_PROGRESS: 'info',
   UNDER_MAINTENANCE: 'warning',
   LOST: 'danger',

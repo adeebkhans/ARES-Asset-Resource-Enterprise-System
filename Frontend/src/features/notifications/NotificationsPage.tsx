@@ -16,7 +16,12 @@ const TYPE_LABELS: Record<string, string> = {
   MAINTENANCE_STATUS_CHANGED: 'Maintenance',
   AUDIT_CYCLE_CREATED: 'Audit',
   AUDIT_CYCLE_CLOSED: 'Audit',
-  AUDIT_RECORD_SUBMITTED: 'Audit',
+  AUDIT_ASSIGNED: 'Audit',
+  AUDIT_DISCREPANCY: 'Audit',
+  APPROVAL_REQUESTED: 'Approval',
+  APPROVAL_APPROVED: 'Approval',
+  APPROVAL_REJECTED: 'Approval',
+  APPROVAL_ESCALATED: 'Approval',
   SYSTEM: 'System',
 };
 
