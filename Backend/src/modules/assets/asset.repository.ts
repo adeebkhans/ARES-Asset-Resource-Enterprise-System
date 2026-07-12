@@ -47,6 +47,11 @@ export class AssetRepository extends BaseRepository<Asset> {
     });
   }
 
+  /** Lightweight lookup by id alone — use when you only need status/orgId, not the full include set. */
+  async findByIdSimple(id: string): Promise<Asset | null> {
+    return prisma.asset.findUnique({ where: { id } });
+  }
+
   async search(
     orgId: string,
     params: AssetSearchParams,
