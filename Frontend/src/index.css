@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-role-admin: #7c3aed;
+  --color-role-asset-manager: #0891b2;
+  --color-role-department-head: #d97706;
+  --color-role-employee: #16a34a;
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100;
+}
+
+#root {
+  min-height: 100svh;
+}
