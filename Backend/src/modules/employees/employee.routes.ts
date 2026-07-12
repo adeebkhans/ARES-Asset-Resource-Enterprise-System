@@ -11,8 +11,11 @@ const controller = new EmployeeController();
 
 const authMiddleware = [authenticate, requireOrgContext];
 
-router.get('/', ...authMiddleware, controller.list);
-router.get('/:id', ...authMiddleware, controller.getById);
+// The Employee Directory (names, emails, roles) is Admin-only per the Org Setup
+// screen spec (plan.md) — unlike Departments/Categories it carries PII and role
+// assignments, so it isn't opened up to other roles the way those are.
+router.get('/', ...authMiddleware, allow('ADMIN'), controller.list);
+router.get('/:id', ...authMiddleware, allow('ADMIN'), controller.getById);
 router.patch('/:id', ...authMiddleware, allow('ADMIN'), validate(updateEmployeeSchema), controller.update);
 router.patch('/:id/role', ...authMiddleware, allow('ADMIN'), validate(updateEmployeeRoleSchema), controller.updateRole);
 

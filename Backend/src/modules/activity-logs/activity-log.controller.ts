@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { asyncHandler } from '@/core/base/asyncHandler';
-import { sendSuccess } from '@/utils/response';
+import { sendPaginated } from '@/utils/response';
 import { ActivityLogService } from './activity-log.service';
 import { paginationQuerySchema } from '@/utils/pagination';
 
@@ -15,6 +15,6 @@ export class ActivityLogController {
     if (typeof req.query.userId === 'string') filters.userId = req.query.userId;
 
     const result = await this.service.listByOrg(req.auth!.orgId, params, filters);
-    sendSuccess(res, result.items, 200);
+    sendPaginated(res, result);
   });
 }

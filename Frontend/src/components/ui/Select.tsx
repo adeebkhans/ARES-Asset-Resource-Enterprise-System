@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import type { SelectHTMLAttributes } from 'react';
 import clsx from 'clsx';
 
@@ -11,14 +11,18 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, options, placeholder, id, className, ...rest }, ref) => {
-    const selectId = id ?? label.toLowerCase().replace(/\s+/g, '-');
+    const generatedId = useId();
+    const selectId = id ?? (label ? label.toLowerCase().replace(/\s+/g, '-') : generatedId);
     return (
       <div className="flex flex-col gap-1">
-        <label htmlFor={selectId} className="text-sm font-medium text-slate-700 dark:text-slate-300">
-          {label}
-        </label>
+        {label && (
+          <label htmlFor={selectId} className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            {label}
+          </label>
+        )}
         <select
           id={selectId}
+          aria-label={label || placeholder}
           ref={ref}
           className={clsx(
             'rounded-md border px-3 py-2 text-sm outline-none transition-colors',

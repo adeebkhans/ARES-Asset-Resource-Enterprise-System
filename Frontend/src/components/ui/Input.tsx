@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import type { InputHTMLAttributes } from 'react';
 import clsx from 'clsx';
 
@@ -8,14 +8,21 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(({ label, error, id, className, ...rest }, ref) => {
-  const inputId = id ?? label.toLowerCase().replace(/\s+/g, '-');
+  const generatedId = useId();
+  // A blank label (e.g. a toolbar search box) means no visible <label> — fall
+  // back to a stable generated id instead of deriving one from empty text,
+  // which produced duplicate id="" attributes when multiple such inputs shared a page.
+  const inputId = id ?? (label ? label.toLowerCase().replace(/\s+/g, '-') : generatedId);
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={inputId} className="text-sm font-medium text-slate-700 dark:text-slate-300">
-        {label}
-      </label>
+      {label && (
+        <label htmlFor={inputId} className="text-sm font-medium text-slate-700 dark:text-slate-300">
+          {label}
+        </label>
+      )}
       <input
         id={inputId}
+        aria-label={label || rest.placeholder}
         ref={ref}
         className={clsx(
           'rounded-md border px-3 py-2 text-sm outline-none transition-colors',

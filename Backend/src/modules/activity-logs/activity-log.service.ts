@@ -1,3 +1,4 @@
+import { ActivityLog } from '@prisma/client';
 import { PaginatedResult, PaginationParams } from '@/types/common.types';
 import { ActivityLogRepository } from './activity-log.repository';
 
@@ -19,7 +20,7 @@ export class ActivityLogService {
     orgId: string,
     params: PaginationParams,
     filters?: { entityType?: string; entityId?: string; userId?: string },
-  ): Promise<PaginatedResult<any>> {
+  ): Promise<PaginatedResult<ActivityLog>> {
     return this.repo.listByOrg(orgId, params, filters);
   }
 
@@ -28,7 +29,7 @@ export class ActivityLogService {
     entityType: string,
     entityId: string,
     params: PaginationParams,
-  ): Promise<PaginatedResult<any>> {
+  ): Promise<PaginatedResult<ActivityLog>> {
     return this.repo.listByEntity(orgId, entityType, entityId, params);
   }
 }

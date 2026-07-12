@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { asyncHandler } from '@/core/base/asyncHandler';
-import { sendSuccess } from '@/utils/response';
+import { sendPaginated, sendSuccess } from '@/utils/response';
 import { EmployeeService } from './employee.service';
 import { paginationQuerySchema } from '@/utils/pagination';
+import { Role } from '@/constants/roles';
 
 export class EmployeeController {
   constructor(private readonly service: EmployeeService = new EmployeeService()) {}
@@ -11,7 +12,7 @@ export class EmployeeController {
     const params = paginationQuerySchema.parse(req.query);
     const search = typeof req.query.search === 'string' ? req.query.search : undefined;
     const result = await this.service.list(req.auth!.orgId, params, search);
-    sendSuccess(res, result.items, 200);
+    sendPaginated(res, result);
   });
 
   getById = asyncHandler(async (req: Request, res: Response) => {
@@ -24,7 +25,8 @@ export class EmployeeController {
       req.auth!.orgId,
       req.params.id,
       req.body,
-      req.auth!.role as any,
+      req.auth!.role as Role,
+      req.auth!.userId,
     );
     sendSuccess(res, emp);
   });

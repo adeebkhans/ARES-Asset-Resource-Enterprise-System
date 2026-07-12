@@ -33,12 +33,21 @@ export function Badge({ variant = 'default', children, className }: BadgeProps) 
 const STATUS_BADGE: Record<string, BadgeVariant> = {
   AVAILABLE: 'success',
   ACTIVE: 'success',
+  PLANNED: 'info',
   ALLOCATED: 'info',
   RESERVED: 'info',
+  PENDING: 'warning',
+  APPROVED: 'success',
+  REJECTED: 'danger',
+  IN_PROGRESS: 'info',
   UNDER_MAINTENANCE: 'warning',
   LOST: 'danger',
+  MISSING: 'danger',
+  DAMAGED: 'warning',
+  VERIFIED: 'success',
   RETIRED: 'default',
   DISPOSED: 'default',
+  CLOSED: 'default',
   INACTIVE: 'danger',
 };
 

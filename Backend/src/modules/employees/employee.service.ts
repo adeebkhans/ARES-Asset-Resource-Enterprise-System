@@ -1,5 +1,6 @@
 import { ApiError } from '@/core/errors/ApiError';
 import { canAssignRoles } from '@/core/auth/roles';
+import { prisma } from '@/core/database/prisma';
 import { PaginatedResult, PaginationParams } from '@/types/common.types';
 import { EmployeeRepository, EmployeeListItem } from './employee.repository';
 import { UpdateEmployeeInput, UpdateEmployeeRoleInput } from './employee.validators';
@@ -25,7 +26,13 @@ export class EmployeeService {
     return emp;
   }
 
-  async updateRole(orgId: string, id: string, input: UpdateEmployeeRoleInput, requestedByRole: Role) {
+  async updateRole(
+    orgId: string,
+    id: string,
+    input: UpdateEmployeeRoleInput,
+    requestedByRole: Role,
+    requestedByUserId: string,
+  ) {
     if (!canAssignRoles(requestedByRole)) {
       throw ApiError.forbidden('Only Admins can promote or demote employees');
     }
@@ -33,7 +40,7 @@ export class EmployeeService {
     const emp = await this.repo.findById(orgId, id);
     if (!emp) throw ApiError.notFound('Employee not found');
 
-    if (emp.id === orgId) {
+    if (emp.id === requestedByUserId) {
       throw ApiError.badRequest('Cannot change your own role');
     }
 
@@ -46,7 +53,6 @@ export class EmployeeService {
     if (!emp) throw ApiError.notFound('Employee not found');
 
     if (input.departmentId) {
-      const { prisma } = await import('@/core/database/prisma');
       const dept = await prisma.department.findFirst({
         where: { id: input.departmentId, orgId },
       });

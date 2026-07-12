@@ -1,12 +1,13 @@
 import { ApiError } from '@/core/errors/ApiError';
+import { prisma } from '@/core/database/prisma';
 import { PaginatedResult, PaginationParams } from '@/types/common.types';
-import { AssetCategoryRepository } from './asset-category.repository';
+import { AssetCategoryRepository, AssetCategoryWithCount } from './asset-category.repository';
 import { CreateAssetCategoryInput, UpdateAssetCategoryInput } from './asset-category.validators';
 
 export class AssetCategoryService {
   constructor(private readonly repo: AssetCategoryRepository = new AssetCategoryRepository()) {}
 
-  async list(orgId: string, params: PaginationParams): Promise<PaginatedResult<any>> {
+  async list(orgId: string, params: PaginationParams): Promise<PaginatedResult<AssetCategoryWithCount>> {
     return this.repo.listWithCounts(orgId, params);
   }
 
@@ -45,7 +46,6 @@ export class AssetCategoryService {
     const existing = await this.repo.findById(orgId, id);
     if (!existing) throw ApiError.notFound('Asset category not found');
 
-    const { prisma } = await import('@/core/database/prisma');
     const assetCount = await prisma.asset.count({ where: { categoryId: id } });
     if (assetCount > 0) {
       throw ApiError.badRequest('Cannot delete a category with assets. Reassign assets first.');

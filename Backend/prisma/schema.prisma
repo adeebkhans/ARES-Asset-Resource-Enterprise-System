@@ -35,10 +35,12 @@ model Organization {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  users           User[]
-  departments     Department[]
-  assetCategories AssetCategory[]
-  assets          Asset[]
+  users              User[]
+  departments        Department[]
+  assetCategories    AssetCategory[]
+  assets             Asset[]
+  maintenanceRequests MaintenanceRequest[]
+  auditCycles        AuditCycle[]
 
   @@map("organizations")
 }
@@ -67,10 +69,14 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  organization Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  department   Department?   @relation("DepartmentMembers", fields: [departmentId], references: [id], onDelete: SetNull)
-  refreshTokens RefreshToken[]
-  headOfDepartments Department[] @relation("DepartmentHead")
+  organization       Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  department         Department?        @relation("DepartmentMembers", fields: [departmentId], references: [id], onDelete: SetNull)
+  refreshTokens      RefreshToken[]
+  headOfDepartments  Department[]       @relation("DepartmentHead")
+  maintenanceRequests MaintenanceRequest[] @relation("MaintenanceRaisedBy")
+  auditAssignments   AuditAssignment[]
+  auditRecords       AuditRecord[]      @relation("AuditRecordsAuditedBy")
+  auditCyclesCreated AuditCycle[]       @relation("AuditCycleCreator")
 
   @@unique([orgId, email])
   @@index([orgId])
@@ -110,11 +116,12 @@ model Department {
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 
-  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  head         User?        @relation("DepartmentHead", fields: [headUserId], references: [id], onDelete: SetNull)
-  parent       Department?  @relation("DepartmentHierarchy", fields: [parentDepartmentId], references: [id], onDelete: SetNull)
-  children     Department[] @relation("DepartmentHierarchy")
-  members      User[]       @relation("DepartmentMembers")
+  organization Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  head         User?             @relation("DepartmentHead", fields: [headUserId], references: [id], onDelete: SetNull)
+  parent       Department?       @relation("DepartmentHierarchy", fields: [parentDepartmentId], references: [id], onDelete: SetNull)
+  children     Department[]      @relation("DepartmentHierarchy")
+  members      User[]            @relation("DepartmentMembers")
+  auditCycles  AuditCycle[]      @relation("AuditCycleScope")
 
   @@unique([orgId, name])
   @@index([orgId])
@@ -175,6 +182,8 @@ model Asset {
   organization  Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
   category      AssetCategory       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   statusHistory AssetStatusHistory[]
+  maintenanceRequests MaintenanceRequest[]
+  auditRecords        AuditRecord[]
 
   @@unique([orgId, assetTag])
   @@index([orgId])
@@ -207,7 +216,157 @@ model AssetStatusHistory {
 }
 
 // ---------------------------------------------------------------------------
-// 4.8 Activity Logs
+// 4.5 Maintenance
+// ---------------------------------------------------------------------------
+
+enum MaintenanceStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum MaintenancePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model MaintenanceRequest {
+  id               String            @id @default(uuid())
+  orgId            String
+  assetId          String
+  raisedById       String
+  issueDescription String
+  priority         MaintenancePriority @default(MEDIUM)
+  photos           String[]          @default([])
+  technicianName   String?
+  status           MaintenanceStatus @default(PENDING)
+  resolvedAt       DateTime?
+  resolutionNotes  String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  organization Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  asset        Asset              @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  raisedBy     User               @relation("MaintenanceRaisedBy", fields: [raisedById], references: [id], onDelete: Restrict)
+
+  @@index([orgId])
+  @@index([orgId, status])
+  @@index([assetId])
+  @@map("maintenance_requests")
+}
+
+// ---------------------------------------------------------------------------
+// 4.6 Audits
+// ---------------------------------------------------------------------------
+
+enum AuditCycleStatus {
+  PLANNED
+  IN_PROGRESS
+  CLOSED
+}
+
+model AuditCycle {
+  id                 String          @id @default(uuid())
+  orgId              String
+  scopeDepartmentId  String?
+  scopeLocation      String?
+  startDate          DateTime
+  endDate            DateTime
+  status             AuditCycleStatus @default(PLANNED)
+  createdBy          String
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  organization    Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  scopeDepartment Department?         @relation("AuditCycleScope", fields: [scopeDepartmentId], references: [id], onDelete: SetNull)
+  creator         User                @relation("AuditCycleCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  assignments     AuditAssignment[]
+  records         AuditRecord[]
+  discrepancyReport DiscrepancyReport?
+
+  @@index([orgId])
+  @@index([orgId, status])
+  @@map("audit_cycles")
+}
+
+model AuditAssignment {
+  id            String    @id @default(uuid())
+  auditCycleId  String
+  auditorUserId String
+  createdAt     DateTime  @default(now())
+
+  auditCycle AuditCycle @relation(fields: [auditCycleId], references: [id], onDelete: Cascade)
+  auditor    User       @relation(fields: [auditorUserId], references: [id], onDelete: Cascade)
+
+  @@unique([auditCycleId, auditorUserId])
+  @@index([auditorUserId])
+  @@map("audit_assignments")
+}
+
+enum AuditResult {
+  VERIFIED
+  MISSING
+  DAMAGED
+}
+
+model AuditRecord {
+  id            String      @id @default(uuid())
+  auditCycleId  String
+  assetId       String
+  result        AuditResult
+  notes         String?
+  auditedById   String
+  auditedAt     DateTime    @default(now())
+
+  auditCycle AuditCycle @relation(fields: [auditCycleId], references: [id], onDelete: Cascade)
+  asset      Asset      @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  auditedBy  User       @relation("AuditRecordsAuditedBy", fields: [auditedById], references: [id], onDelete: Restrict)
+
+  @@unique([auditCycleId, assetId])
+  @@index([assetId])
+  @@map("audit_records")
+}
+
+model DiscrepancyReport {
+  id           String   @id @default(uuid())
+  auditCycleId String   @unique
+  generatedAt  DateTime @default(now())
+  itemCount    Int
+  summary      Json
+
+  auditCycle AuditCycle @relation(fields: [auditCycleId], references: [id], onDelete: Cascade)
+
+  @@map("discrepancy_reports")
+}
+
+// ---------------------------------------------------------------------------
+// 4.8 Notifications
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id                 String   @id @default(uuid())
+  orgId              String
+  userId             String
+  type               String
+  title              String
+  message            String
+  relatedEntityType  String?
+  relatedEntityId    String?
+  isRead             Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  @@index([orgId])
+  @@index([orgId, userId])
+  @@index([orgId, userId, isRead])
+  @@map("notifications")
+}
+
+// ---------------------------------------------------------------------------
+// 4.8 Activity Logs (Phase 1)
 // ---------------------------------------------------------------------------
 
 model ActivityLog {

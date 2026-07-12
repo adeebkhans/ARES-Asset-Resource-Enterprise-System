@@ -2,11 +2,11 @@ import { Request, Response } from 'express';
 import { asyncHandler } from '@/core/base/asyncHandler';
 import { sendPaginated, sendSuccess } from '@/utils/response';
 import { paginationQuerySchema } from '@/utils/pagination';
-import { AssetService } from './asset.service';
-import { assetSearchSchema } from './asset.validators';
+import { MaintenanceService } from './maintenance.service';
+import { maintenanceSearchSchema } from './maintenance.validators';
 
-export class AssetController {
-  constructor(private readonly service: AssetService = new AssetService()) {}
+export class MaintenanceController {
+  constructor(private readonly service: MaintenanceService = new MaintenanceService()) {}
 
   list = asyncHandler(async (req: Request, res: Response) => {
     const params = paginationQuerySchema.parse(req.query);
@@ -15,34 +15,29 @@ export class AssetController {
   });
 
   search = asyncHandler(async (req: Request, res: Response) => {
-    const params = assetSearchSchema.parse(req.query);
+    const params = maintenanceSearchSchema.parse(req.query);
     const result = await this.service.search(req.auth!.orgId, params);
     sendPaginated(res, result);
   });
 
   getById = asyncHandler(async (req: Request, res: Response) => {
-    const asset = await this.service.getById(req.auth!.orgId, req.params.id);
-    sendSuccess(res, asset);
+    const request = await this.service.getById(req.auth!.orgId, req.params.id);
+    sendSuccess(res, request);
   });
 
   create = asyncHandler(async (req: Request, res: Response) => {
-    const asset = await this.service.create(req.auth!.orgId, req.body, req.auth!.userId);
-    sendSuccess(res, asset, 201);
+    const request = await this.service.create(req.auth!.orgId, req.body, req.auth!.userId);
+    sendSuccess(res, request, 201);
   });
 
-  update = asyncHandler(async (req: Request, res: Response) => {
-    const asset = await this.service.update(req.auth!.orgId, req.params.id, req.body);
-    sendSuccess(res, asset);
-  });
-
-  transitionStatus = asyncHandler(async (req: Request, res: Response) => {
-    const asset = await this.service.transitionStatus(
+  updateStatus = asyncHandler(async (req: Request, res: Response) => {
+    const request = await this.service.updateStatus(
       req.auth!.orgId,
       req.params.id,
       req.body,
       req.auth!.userId,
     );
-    sendSuccess(res, asset);
+    sendSuccess(res, request);
   });
 
   statusCounts = asyncHandler(async (req: Request, res: Response) => {
