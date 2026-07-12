@@ -109,5 +109,55 @@ export function registerActivityLogListeners(): void {
     });
   });
 
+  // Phase 4 — Approvals
+  eventBus.on('approval.requested', async (payload) => {
+    await service.log({
+      orgId: payload.orgId,
+      userId: payload.requestedById,
+      action: 'approval.requested',
+      entityType: payload.entityType,
+      entityId: payload.entityId,
+      metadata: { type: payload.type, approvalId: payload.approvalId, dueAt: payload.dueAt },
+    });
+  });
+
+  eventBus.on('approval.approved', async (payload) => {
+    await service.log({
+      orgId: payload.orgId,
+      userId: payload.decidedById,
+      action: 'approval.approved',
+      entityType: payload.entityType,
+      entityId: payload.entityId,
+      metadata: { type: payload.type, approvalId: payload.approvalId, comment: payload.comment },
+    });
+  });
+
+  eventBus.on('approval.rejected', async (payload) => {
+    await service.log({
+      orgId: payload.orgId,
+      userId: payload.decidedById,
+      action: 'approval.rejected',
+      entityType: payload.entityType,
+      entityId: payload.entityId,
+      metadata: { type: payload.type, approvalId: payload.approvalId, comment: payload.comment },
+    });
+  });
+
+  eventBus.on('approval.escalated', async (payload) => {
+    await service.log({
+      orgId: payload.orgId,
+      userId: payload.previousApproverUserId,
+      action: 'approval.escalated',
+      entityType: payload.entityType,
+      entityId: payload.entityId,
+      metadata: {
+        type: payload.type,
+        approvalId: payload.approvalId,
+        previousApproverUserId: payload.previousApproverUserId,
+        newApproverUserId: payload.newApproverUserId,
+      },
+    });
+  });
+
   logger.info('Activity log event listeners registered');
 }

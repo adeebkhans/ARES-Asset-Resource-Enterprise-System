@@ -40,6 +40,11 @@ export class MaintenanceController {
     sendSuccess(res, request);
   });
 
+  getApproval = asyncHandler(async (req: Request, res: Response) => {
+    const approval = await this.service.getApproval(req.auth!.orgId, req.params.id);
+    sendSuccess(res, approval);
+  });
+
   statusCounts = asyncHandler(async (req: Request, res: Response) => {
     const counts = await this.service.getStatusCounts(req.auth!.orgId);
     sendSuccess(res, counts);

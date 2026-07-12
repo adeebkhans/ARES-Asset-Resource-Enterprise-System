@@ -6,6 +6,7 @@ import { eventBus } from '@/core/events';
 import { PaginatedResult, PaginationParams } from '@/types/common.types';
 import { MaintenanceRepository, MaintenanceRequestWithAsset } from './maintenance.repository';
 import { AssetRepository } from '@/modules/assets/asset.repository';
+import { ApprovalRepository } from '@/modules/approvals/approval.repository';
 import {
   CreateMaintenanceRequestInput,
   UpdateMaintenanceStatusInput,
@@ -16,6 +17,7 @@ export class MaintenanceService {
   constructor(
     private readonly repo: MaintenanceRepository = new MaintenanceRepository(),
     private readonly assetRepo: AssetRepository = new AssetRepository(),
+    private readonly approvalRepo: ApprovalRepository = new ApprovalRepository(),
   ) {}
 
   async list(orgId: string, params: PaginationParams): Promise<PaginatedResult<MaintenanceRequestWithAsset>> {
@@ -61,6 +63,10 @@ export class MaintenanceService {
     return this.getById(orgId, request.id);
   }
 
+  /**
+   * Update maintenance status for post-approval workflow (IN_PROGRESS, RESOLVED).
+   * APPROVED/REJECTED goes through the approval engine.
+   */
   async updateStatus(
     orgId: string,
     id: string,
@@ -72,7 +78,7 @@ export class MaintenanceService {
 
     const fromStatus = request.status;
 
-    // Validate state transition
+    // Validate state transition — only IN_PROGRESS and RESOLVED are allowed directly
     this.validateMaintenanceTransition(fromStatus, input.status);
 
     const updateData: Record<string, unknown> = {
@@ -101,22 +107,29 @@ export class MaintenanceService {
     return this.getById(orgId, id);
   }
 
+  /**
+   * Get the approval for a maintenance request.
+   */
+  async getApproval(orgId: string, id: string) {
+    const request = await this.repo.findById(orgId, id);
+    if (!request) throw ApiError.notFound('Maintenance request not found');
+    return this.approvalRepo.findByEntity('MaintenanceRequest', id);
+  }
+
   async getStatusCounts(orgId: string) {
     return this.repo.countByStatus(orgId);
   }
 
   private validateMaintenanceTransition(from: string, to: string): void {
+    // Only IN_PROGRESS and RESOLVED are direct status changes post-approval
     const validTransitions: Record<string, string[]> = {
-      PENDING: ['APPROVED', 'REJECTED'],
-      APPROVED: ['IN_PROGRESS', 'REJECTED'],
+      APPROVED: ['IN_PROGRESS', 'RESOLVED'],
       IN_PROGRESS: ['RESOLVED'],
-      REJECTED: [],
-      RESOLVED: [],
     };
 
     if (!validTransitions[from]?.includes(to)) {
       throw ApiError.invalidStateTransition(
-        `Cannot transition maintenance from "${from}" to "${to}"`,
+        `Cannot transition maintenance from "${from}" to "${to}". APPROVED/REJECTED must go through the approval engine.`,
         { from, to },
       );
     }
@@ -126,28 +139,7 @@ export class MaintenanceService {
     const asset = await this.assetRepo.findByIdSimple(assetId);
     if (!asset) return;
 
-    if (maintenanceStatus === 'APPROVED') {
-      // Transition asset to UNDER_MAINTENANCE
-      const newStatus = assertTransition(ASSET_TRANSITIONS, asset.status, 'approve_maintenance') as AssetStatus;
-      await this.assetRepo.update(asset.orgId, assetId, { status: newStatus });
-      await this.assetRepo.writeStatusHistory({
-        assetId,
-        fromStatus: asset.status,
-        toStatus: newStatus,
-        changedBy: userId,
-        source: 'MAINTENANCE',
-        reason: 'Maintenance approved',
-      });
-      eventBus.emit('asset.status.changed', {
-        assetId,
-        orgId: asset.orgId,
-        fromStatus: asset.status,
-        toStatus: newStatus,
-        changedBy: userId,
-        source: 'MAINTENANCE',
-        reason: 'Maintenance approved',
-      });
-    } else if (maintenanceStatus === 'RESOLVED') {
+    if (maintenanceStatus === 'RESOLVED') {
       // Transition asset back to AVAILABLE (from UNDER_MAINTENANCE)
       const newStatus = assertTransition(ASSET_TRANSITIONS, asset.status, 'resolve_maintenance') as AssetStatus;
       await this.assetRepo.update(asset.orgId, assetId, { status: newStatus });
