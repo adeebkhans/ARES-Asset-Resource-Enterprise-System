@@ -111,6 +111,29 @@ export interface DomainEventMap {
     newApproverUserId: string;
     dueAt: Date;
   };
+
+  // Phase 5 — Configurable Object Framework
+  'custom-object.record.created': {
+    orgId: string;
+    recordId: string;
+    objectDefinitionId: string;
+    objectKey: string;
+    createdBy: string;
+  };
+  'custom-object.record.updated': {
+    orgId: string;
+    recordId: string;
+    objectDefinitionId: string;
+    objectKey: string;
+    updatedBy: string;
+  };
+  'custom-object.record.deleted': {
+    orgId: string;
+    recordId: string;
+    objectDefinitionId: string;
+    objectKey: string;
+    deletedBy: string;
+  };
 }
 
 export type DomainEventName = keyof DomainEventMap;
