@@ -14,9 +14,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     const generatedId = useId();
     const selectId = id ?? (label ? label.toLowerCase().replace(/\s+/g, '-') : generatedId);
     return (
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1.5">
         {label && (
-          <label htmlFor={selectId} className="text-sm font-medium text-slate-700 dark:text-slate-300">
+          <label htmlFor={selectId} className="text-sm font-medium text-ink-700 dark:text-ink-300">
             {label}
           </label>
         )}
@@ -25,11 +25,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           aria-label={label || placeholder}
           ref={ref}
           className={clsx(
-            'rounded-md border px-3 py-2 text-sm outline-none transition-colors',
-            'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100',
+            'rounded-lg border px-3 py-2 text-sm outline-none transition-colors',
+            'bg-white text-ink-900 dark:bg-ink-900 dark:text-ink-100',
             error
-              ? 'border-red-500 focus:border-red-500'
-              : 'border-slate-300 focus:border-slate-500 dark:border-slate-700 dark:focus:border-slate-400',
+              ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30'
+              : 'border-ink-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:border-ink-700 dark:focus:border-brand-500 dark:focus:ring-brand-900/30',
             className,
           )}
           {...rest}

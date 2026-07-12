@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { EmptyState } from '@/components/ui/EmptyState';
 import {
   listNotifications,
   getUnreadCount,
@@ -58,8 +59,8 @@ export function NotificationsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Notifications</h1>
-        <p className="text-sm text-slate-500">System alerts and status updates.</p>
+        <h1 className="font-display text-2xl font-semibold text-ink-900 dark:text-white">Notifications</h1>
+        <p className="text-sm text-ink-500">System alerts and status updates.</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -73,10 +74,10 @@ export function NotificationsPage() {
         )}
       </div>
 
-      {isLoading && <p className="text-sm text-slate-500">Loading...</p>}
+      {isLoading && <p className="text-sm text-ink-500">Loading…</p>}
 
       {!isLoading && notifications.length === 0 && (
-        <p className="text-sm text-slate-500">No notifications.</p>
+        <EmptyState icon="🔔" title="All quiet" description="You'll see updates from Maintenance, Audits, and Approvals here." />
       )}
 
       {notifications.length > 0 && (
@@ -84,22 +85,22 @@ export function NotificationsPage() {
           {notifications.map((n: Notification) => (
             <Card
               key={n.id}
-              className={`flex items-start gap-3 p-4 ${!n.isRead ? 'border-l-4 border-blue-500' : ''}`}
+              className={`flex items-start gap-3 p-4 ${!n.isRead ? 'border-l-4 border-brand-500' : ''}`}
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-slate-900 dark:text-white">{n.title}</span>
+                  <span className="text-sm font-medium text-ink-900 dark:text-white">{n.title}</span>
                   <Badge variant="default">{TYPE_LABELS[n.type] ?? n.type}</Badge>
-                  {!n.isRead && <Badge variant="info">New</Badge>}
+                  {!n.isRead && <Badge variant="brand">New</Badge>}
                 </div>
-                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{n.message}</p>
-                <span className="mt-1 block text-xs text-slate-400">
+                <p className="mt-1 text-sm text-ink-600 dark:text-ink-400">{n.message}</p>
+                <span className="mt-1 block text-xs text-ink-400">
                   {new Date(n.createdAt).toLocaleString()}
                 </span>
               </div>
               {!n.isRead && (
                 <button
-                  className="text-xs text-blue-600 hover:underline shrink-0"
+                  className="text-xs text-brand-700 hover:underline shrink-0 dark:text-brand-400"
                   onClick={() => markReadMutation.mutate(n.id)}
                 >
                   Mark read

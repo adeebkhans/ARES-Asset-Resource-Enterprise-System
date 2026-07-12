@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { StatusBadge } from '@/components/ui/Badge';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { ApiRequestError } from '@/types/api.types';
 import { listDepartments, createDepartment, deleteDepartment } from '@/features/departments/api';
 import type { Department } from '@/types/domain.types';
@@ -40,36 +41,36 @@ export function DepartmentsTab() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Departments</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-500">Departments</h3>
         <Button onClick={() => setShowCreate(true)}>Add Department</Button>
       </div>
 
-      {isLoading && <p className="text-sm text-slate-500">Loading...</p>}
+      {isLoading && <p className="text-sm text-ink-500">Loading...</p>}
 
       {!isLoading && departments.length === 0 && (
-        <p className="text-sm text-slate-500">No departments yet. Create one to get started.</p>
+        <EmptyState icon="🏢" title="No departments yet" description="Create your first department to start organizing employees." action={<Button onClick={() => setShowCreate(true)}>Add Department</Button>} />
       )}
 
       {departments.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-700">
-                <th className="pb-2 font-medium text-slate-500">Name</th>
-                <th className="pb-2 font-medium text-slate-500">Head</th>
-                <th className="pb-2 font-medium text-slate-500">Members</th>
-                <th className="pb-2 font-medium text-slate-500">Status</th>
-                <th className="pb-2 font-medium text-slate-500"></th>
+              <tr className="border-b border-ink-200 dark:border-ink-700">
+                <th className="pb-2 font-medium text-ink-500">Name</th>
+                <th className="pb-2 font-medium text-ink-500">Head</th>
+                <th className="pb-2 font-medium text-ink-500">Members</th>
+                <th className="pb-2 font-medium text-ink-500">Status</th>
+                <th className="pb-2 font-medium text-ink-500"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
               {departments.map((dept: Department) => (
                 <tr key={dept.id}>
-                  <td className="py-2 font-medium text-slate-900 dark:text-white">{dept.name}</td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">
+                  <td className="py-2 font-medium text-ink-900 dark:text-white">{dept.name}</td>
+                  <td className="py-2 text-ink-600 dark:text-ink-400">
                     {dept.head?.name ?? '—'}
                   </td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">
+                  <td className="py-2 text-ink-600 dark:text-ink-400">
                     {dept._count?.members ?? 0}
                   </td>
                   <td className="py-2"><StatusBadge status={dept.status} /></td>

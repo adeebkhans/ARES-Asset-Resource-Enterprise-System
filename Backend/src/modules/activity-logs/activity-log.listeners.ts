@@ -159,5 +159,39 @@ export function registerActivityLogListeners(): void {
     });
   });
 
+  // Phase 5 — Configurable Object Framework
+  eventBus.on('custom-object.record.created', async (payload) => {
+    await service.log({
+      orgId: payload.orgId,
+      userId: payload.createdBy,
+      action: 'custom-object.record.created',
+      entityType: payload.objectKey,
+      entityId: payload.recordId,
+      metadata: { objectDefinitionId: payload.objectDefinitionId },
+    });
+  });
+
+  eventBus.on('custom-object.record.updated', async (payload) => {
+    await service.log({
+      orgId: payload.orgId,
+      userId: payload.updatedBy,
+      action: 'custom-object.record.updated',
+      entityType: payload.objectKey,
+      entityId: payload.recordId,
+      metadata: { objectDefinitionId: payload.objectDefinitionId },
+    });
+  });
+
+  eventBus.on('custom-object.record.deleted', async (payload) => {
+    await service.log({
+      orgId: payload.orgId,
+      userId: payload.deletedBy,
+      action: 'custom-object.record.deleted',
+      entityType: payload.objectKey,
+      entityId: payload.recordId,
+      metadata: { objectDefinitionId: payload.objectDefinitionId },
+    });
+  });
+
   logger.info('Activity log event listeners registered');
 }

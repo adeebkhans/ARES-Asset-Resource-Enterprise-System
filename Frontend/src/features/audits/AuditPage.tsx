@@ -9,6 +9,7 @@ import { Select } from '@/components/ui/Select';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
 import { StatusBadge } from '@/components/ui/Badge';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { ApiRequestError } from '@/types/api.types';
 import {
   searchAudits,
@@ -153,17 +154,20 @@ export function AuditPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Audits</h1>
-        <p className="text-sm text-slate-500">Plan audit cycles, assign auditors, and track discrepancies.</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-semibold text-ink-900 dark:text-white">Audits</h1>
+          <p className="text-sm text-ink-500">Plan audit cycles, assign auditors, and track discrepancies.</p>
+        </div>
+        <Button onClick={() => { setShowCreate(true); setError(''); resetCreate(); }}>+ Create Cycle</Button>
       </div>
 
       {statusCounts && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3">
           {Object.entries(statusCounts as Record<string, number>).map(([status, count]) => (
             <Card key={status} className="flex flex-col items-center gap-1 py-3">
-              <span className="text-2xl font-bold text-slate-900 dark:text-white">{count}</span>
-              <span className="text-xs text-slate-500">{status.replace(/_/g, ' ')}</span>
+              <span className="font-display text-2xl font-bold text-ink-900 dark:text-white">{count}</span>
+              <span className="text-xs text-ink-500">{status.replace(/_/g, ' ')}</span>
             </Card>
           ))}
         </div>
@@ -172,7 +176,7 @@ export function AuditPage() {
       <div className="flex flex-wrap items-end gap-3">
         <Input
           label=""
-          placeholder="Search cycles..."
+          placeholder="Search cycles…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-64"
@@ -184,94 +188,93 @@ export function AuditPage() {
           onChange={(e) => setStatusFilter(e.target.value as AuditCycleStatus | '')}
           className="w-48"
         />
-        <Button onClick={() => { setShowCreate(true); setError(''); resetCreate(); }}>
-          Create Cycle
-        </Button>
       </div>
 
-      {isLoading && <p className="text-sm text-slate-500">Loading...</p>}
+      {isLoading && <p className="text-sm text-ink-500">Loading…</p>}
 
       {!isLoading && cycles.length === 0 && (
-        <p className="text-sm text-slate-500">No audit cycles found.</p>
+        <EmptyState icon="🔍" title="No audit cycles" description="Create a cycle to start verifying assets against their expected state." />
       )}
 
       {cycles.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-700">
-                <th className="pb-2 font-medium text-slate-500">Department</th>
-                <th className="pb-2 font-medium text-slate-500">Location</th>
-                <th className="pb-2 font-medium text-slate-500">Dates</th>
-                <th className="pb-2 font-medium text-slate-500">Auditors</th>
-                <th className="pb-2 font-medium text-slate-500">Status</th>
-                <th className="pb-2 font-medium text-slate-500">Records</th>
-                <th className="pb-2 font-medium text-slate-500">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {cycles.map((cycle: AuditCycle) => (
-                <tr key={cycle.id}>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">
-                    {cycle.scopeDepartment?.name ?? 'All'}
-                  </td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">
-                    {cycle.scopeLocation ?? '—'}
-                  </td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">
-                    {new Date(cycle.startDate).toLocaleDateString()} – {new Date(cycle.endDate).toLocaleDateString()}
-                  </td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">
-                    {cycle.assignments?.map((a) => a.auditor.name).join(', ') ?? '—'}
-                  </td>
-                  <td className="py-2"><StatusBadge status={cycle.status} /></td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">
-                    {cycle._count?.records ?? 0}
-                  </td>
-                  <td className="py-2">
-                    <div className="flex items-center gap-2">
-                      {cycle.status === 'PLANNED' && (
-                        <button
-                          className="text-xs text-green-600 hover:underline"
-                          onClick={() => startCycleMutation.mutate(cycle.id)}
-                        >
-                          Start
-                        </button>
-                      )}
-                      {cycle.status === 'IN_PROGRESS' && (
-                        <>
-                          <button
-                            className="text-xs text-blue-600 hover:underline"
-                            onClick={() => {
-                              setShowRecords(cycle.id);
-                              setShowSubmitRecord(cycle.id);
-                              resetRecord();
-                              setError('');
-                            }}
-                          >
-                            Submit Record
-                          </button>
-                          <button
-                            className="text-xs text-red-600 hover:underline"
-                            onClick={() => closeCycleMutation.mutate(cycle.id)}
-                          >
-                            Close Cycle
-                          </button>
-                        </>
-                      )}
-                      <button
-                        className="text-xs text-slate-500 hover:underline"
-                        onClick={() => setShowRecords(cycle.id)}
-                      >
-                        View
-                      </button>
-                    </div>
-                  </td>
+        <Card className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-ink-200 dark:border-ink-700">
+                  <th className="px-5 py-3 font-medium text-ink-500">Department</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Location</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Dates</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Auditors</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Status</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Records</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
+                {cycles.map((cycle: AuditCycle) => (
+                  <tr key={cycle.id} className="transition-colors hover:bg-ink-50/70 dark:hover:bg-ink-800/40">
+                    <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">
+                      {cycle.scopeDepartment?.name ?? 'All'}
+                    </td>
+                    <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">
+                      {cycle.scopeLocation ?? '—'}
+                    </td>
+                    <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">
+                      {new Date(cycle.startDate).toLocaleDateString()} – {new Date(cycle.endDate).toLocaleDateString()}
+                    </td>
+                    <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">
+                      {cycle.assignments?.map((a) => a.auditor.name).join(', ') ?? '—'}
+                    </td>
+                    <td className="px-5 py-2.5"><StatusBadge status={cycle.status} /></td>
+                    <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">
+                      {cycle._count?.records ?? 0}
+                    </td>
+                    <td className="px-5 py-2.5">
+                      <div className="flex items-center gap-3">
+                        {cycle.status === 'PLANNED' && (
+                          <button
+                            className="text-xs font-medium text-emerald-600 hover:underline"
+                            onClick={() => startCycleMutation.mutate(cycle.id)}
+                          >
+                            Start
+                          </button>
+                        )}
+                        {cycle.status === 'IN_PROGRESS' && (
+                          <>
+                            <button
+                              className="text-xs font-medium text-brand-700 hover:underline dark:text-brand-400"
+                              onClick={() => {
+                                setShowRecords(cycle.id);
+                                setShowSubmitRecord(cycle.id);
+                                resetRecord();
+                                setError('');
+                              }}
+                            >
+                              Submit Record
+                            </button>
+                            <button
+                              className="text-xs font-medium text-red-600 hover:underline"
+                              onClick={() => closeCycleMutation.mutate(cycle.id)}
+                            >
+                              Close Cycle
+                            </button>
+                          </>
+                        )}
+                        <button
+                          className="text-xs font-medium text-ink-500 hover:underline"
+                          onClick={() => setShowRecords(cycle.id)}
+                        >
+                          View
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       )}
 
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Create Audit Cycle">
@@ -288,29 +291,29 @@ export function AuditPage() {
 
       <Modal open={!!showRecords} onClose={() => setShowRecords(null)} title="Audit Records">
         {records.length === 0 ? (
-          <p className="text-sm text-slate-500">No records submitted yet.</p>
+          <p className="text-sm text-ink-500">No records submitted yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700">
-                  <th className="pb-2 font-medium text-slate-500">Asset</th>
-                  <th className="pb-2 font-medium text-slate-500">Result</th>
-                  <th className="pb-2 font-medium text-slate-500">Auditor</th>
-                  <th className="pb-2 font-medium text-slate-500">Notes</th>
+                <tr className="border-b border-ink-200 dark:border-ink-700">
+                  <th className="pb-2 font-medium text-ink-500">Asset</th>
+                  <th className="pb-2 font-medium text-ink-500">Result</th>
+                  <th className="pb-2 font-medium text-ink-500">Auditor</th>
+                  <th className="pb-2 font-medium text-ink-500">Notes</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
                 {records.map((rec: AuditRecord) => (
                   <tr key={rec.id}>
-                    <td className="py-2 font-medium text-slate-900 dark:text-white">
+                    <td className="py-2 font-medium text-ink-900 dark:text-white">
                       {rec.asset?.name ?? rec.assetId}
                     </td>
                     <td className="py-2"><StatusBadge status={rec.result} /></td>
-                    <td className="py-2 text-slate-600 dark:text-slate-400">
+                    <td className="py-2 text-ink-600 dark:text-ink-400">
                       {rec.auditedBy?.name ?? '—'}
                     </td>
-                    <td className="py-2 text-slate-600 dark:text-slate-400">
+                    <td className="py-2 text-ink-600 dark:text-ink-400">
                       {rec.notes ?? '—'}
                     </td>
                   </tr>

@@ -44,6 +44,9 @@ model Organization {
   approvalRules      ApprovalRule[]
   approvals          Approval[]
   approvalDelegations ApprovalDelegation[]
+  customObjectDefinitions CustomObjectDefinition[]
+  customFieldDefinitions  CustomFieldDefinition[]
+  customObjectRecords     CustomObjectRecord[]
 
   @@map("organizations")
 }
@@ -147,6 +150,7 @@ model AssetCategory {
 
   organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   assets       Asset[]
+  customFields CustomFieldDefinition[]
 
   @@unique([orgId, name])
   @@index([orgId])
@@ -476,4 +480,104 @@ model ApprovalDelegation {
   @@index([orgId, delegatorUserId])
   @@index([orgId, delegateUserId])
   @@map("approval_delegations")
+}
+
+// ---------------------------------------------------------------------------
+// 4.9 Configurable Object Framework (Phase 5) — plan.md §7
+//
+// One field-definition table drives BOTH category-specific asset fields
+// (targetType ASSET_CATEGORY) and fields on admin-defined custom objects
+// (targetType CUSTOM_OBJECT). Values live in JSONB (Asset.customFieldValues /
+// CustomObjectRecord.data), validated at the application layer against these
+// definitions — deliberately not EAV (see plan.md §7.2 for the trade-off).
+// ---------------------------------------------------------------------------
+
+enum CustomFieldType {
+  TEXT
+  NUMBER
+  DATE
+  BOOLEAN
+  SELECT
+  MULTISELECT
+  RELATION
+}
+
+enum CustomFieldTargetType {
+  ASSET_CATEGORY
+  CUSTOM_OBJECT
+}
+
+/// Targets a RELATION field can point at. Core entities are enumerated;
+/// CUSTOM_OBJECT relations additionally carry relationObjectDefinitionId.
+enum RelationTarget {
+  ASSET
+  USER
+  DEPARTMENT
+  CUSTOM_OBJECT
+}
+
+model CustomObjectDefinition {
+  id          String   @id @default(uuid())
+  orgId       String
+  key         String   // stable machine key, e.g. "patient"
+  label       String   // "Patient"
+  pluralLabel String   // "Patients" — used for nav + list headings
+  icon        String?  // single emoji, rendered in nav
+  description String?
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organization Organization            @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  fields       CustomFieldDefinition[]
+  records      CustomObjectRecord[]
+
+  @@unique([orgId, key])
+  @@index([orgId])
+  @@map("custom_object_definitions")
+}
+
+model CustomFieldDefinition {
+  id                 String                @id @default(uuid())
+  orgId              String
+  targetType         CustomFieldTargetType
+  categoryId         String?               // set when targetType = ASSET_CATEGORY
+  objectDefinitionId String?               // set when targetType = CUSTOM_OBJECT
+  fieldKey           String                // stable key inside the JSONB blob, e.g. "warrantyMonths"
+  label              String
+  fieldType          CustomFieldType
+  options            Json                  @default("[]") // SELECT/MULTISELECT: string[]
+  isRequired         Boolean               @default(false)
+  relationTarget     RelationTarget?       // set when fieldType = RELATION
+  relationObjectDefinitionId String?       // set when relationTarget = CUSTOM_OBJECT
+  sortOrder          Int                   @default(0)
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  organization     Organization            @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  category         AssetCategory?          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  objectDefinition CustomObjectDefinition? @relation(fields: [objectDefinitionId], references: [id], onDelete: Cascade)
+
+  // fieldKey uniqueness per target is enforced in the service layer — a DB
+  // unique index over nullable columns treats NULLs as distinct, so it can't
+  // express "unique per (org, category)" and "unique per (org, object)" here.
+  @@index([orgId, categoryId])
+  @@index([orgId, objectDefinitionId])
+  @@map("custom_field_definitions")
+}
+
+model CustomObjectRecord {
+  id                 String   @id @default(uuid())
+  orgId              String
+  objectDefinitionId String
+  data               Json     @default("{}")
+  createdBy          String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  organization Organization           @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  definition   CustomObjectDefinition @relation(fields: [objectDefinitionId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, objectDefinitionId])
+  @@map("custom_object_records")
 }

@@ -5,6 +5,8 @@ import { ApiError } from '@/core/errors/ApiError';
 import { ASSET_TRANSITIONS } from '@/constants/asset-states';
 import { assertTransition } from '@/shared/state-machine';
 import { eventBus } from '@/core/events';
+import { validateCustomValues, validateRelations } from '@/shared/custom-fields';
+import { CustomObjectRepository } from '@/modules/custom-objects/custom-object.repository';
 import { PaginatedResult, PaginationParams } from '@/types/common.types';
 import { AssetRepository, AssetListItem } from './asset.repository';
 import {
@@ -26,7 +28,10 @@ function isUniqueConstraintViolation(err: unknown): boolean {
 }
 
 export class AssetService {
-  constructor(private readonly repo: AssetRepository = new AssetRepository()) {}
+  constructor(
+    private readonly repo: AssetRepository = new AssetRepository(),
+    private readonly customObjectRepo: CustomObjectRepository = new CustomObjectRepository(),
+  ) {}
 
   async list(orgId: string, params: PaginationParams): Promise<PaginatedResult<AssetListItem>> {
     return this.repo.search(orgId, { ...params, page: params.page, pageSize: params.pageSize });
@@ -48,7 +53,14 @@ export class AssetService {
     });
     if (!cat) throw ApiError.badRequest('Asset category not found');
 
-    const asset = await this.createWithUniqueTag(orgId, input);
+    // Layer 1 of the Configurable Object Framework (plan.md §7.1): the category's
+    // admin-defined fields (e.g. "warrantyMonths" on Electronics) are validated
+    // here — the schema is metadata, not code, so this stays correct as fields change.
+    const categoryFields = await this.customObjectRepo.listFieldsForCategory(orgId, input.categoryId);
+    const customFieldValues = validateCustomValues(categoryFields, input.customFieldValues);
+    await validateRelations(orgId, categoryFields, customFieldValues);
+
+    const asset = await this.createWithUniqueTag(orgId, input, customFieldValues);
 
     let qrCodeUrl: string | null = null;
     try {
@@ -86,7 +98,11 @@ export class AssetService {
    * then probe forward locally (seq, seq+1, seq+2, ...) so each retry within
    * a request always targets a number none of its own attempts has tried yet.
    */
-  private async createWithUniqueTag(orgId: string, input: CreateAssetInput): Promise<Asset> {
+  private async createWithUniqueTag(
+    orgId: string,
+    input: CreateAssetInput,
+    customFieldValues: Record<string, unknown>,
+  ): Promise<Asset> {
     let sequence = (await this.repo.findMaxAssetTagSequence(orgId)) + 1;
 
     for (let attempt = 0; attempt < MAX_ASSET_TAG_RETRIES; attempt++) {
@@ -103,7 +119,7 @@ export class AssetService {
           condition: input.condition ?? null,
           location: input.location ?? null,
           isShared: input.isShared ?? false,
-          customFieldValues: input.customFieldValues ?? {},
+          customFieldValues,
           qrCodeUrl: null,
           status: 'AVAILABLE',
         });
@@ -138,7 +154,15 @@ export class AssetService {
     if (input.condition !== undefined) data.condition = input.condition;
     if (input.location !== undefined) data.location = input.location;
     if (input.isShared !== undefined) data.isShared = input.isShared;
-    if (input.customFieldValues !== undefined) data.customFieldValues = input.customFieldValues;
+
+    if (input.customFieldValues !== undefined) {
+      // Validate against whichever category will be effective after this update.
+      const effectiveCategoryId = input.categoryId ?? existing.categoryId;
+      const categoryFields = await this.customObjectRepo.listFieldsForCategory(orgId, effectiveCategoryId);
+      const customFieldValues = validateCustomValues(categoryFields, input.customFieldValues);
+      await validateRelations(orgId, categoryFields, customFieldValues);
+      data.customFieldValues = customFieldValues;
+    }
 
     if (Object.keys(data).length > 0) {
       await this.repo.update(orgId, id, data);

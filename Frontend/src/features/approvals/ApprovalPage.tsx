@@ -9,6 +9,7 @@ import { Select } from '@/components/ui/Select';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
 import { StatusBadge } from '@/components/ui/Badge';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { ApiRequestError } from '@/types/api.types';
 import {
   searchApprovals,
@@ -39,7 +40,7 @@ const TYPE_BADGE_CLASS: Record<string, string> = {
   MAINTENANCE: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
   TRANSFER: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
   AUDIT_DISCREPANCY: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  CUSTOM: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+  CUSTOM: 'bg-ink-100 text-ink-700 dark:bg-ink-800 dark:text-ink-300',
 };
 
 const decideSchema = z.object({
@@ -137,27 +138,27 @@ export function ApprovalPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Approvals</h1>
-        <p className="text-sm text-slate-500">Review and manage approval requests across the organization.</p>
+        <h1 className="font-display text-2xl font-semibold text-ink-900 dark:text-white">Approvals</h1>
+        <p className="text-sm text-ink-500">Review and manage approval requests across the organization.</p>
       </div>
 
       {statusCounts && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {Object.entries(statusCounts as Record<string, number>).map(([status, count]) => (
             <Card key={status} className="flex flex-col items-center gap-1 py-3">
-              <span className="text-2xl font-bold text-slate-900 dark:text-white">{count}</span>
-              <span className="text-xs text-slate-500">{status.replace(/_/g, ' ')}</span>
+              <span className="font-display text-2xl font-bold text-ink-900 dark:text-white">{count}</span>
+              <span className="text-xs text-ink-500">{status.replace(/_/g, ' ')}</span>
             </Card>
           ))}
         </div>
       )}
 
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700">
+      <div className="flex items-center gap-2 border-b border-ink-200 dark:border-ink-700">
         <button
           className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'pending'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-brand-600 text-brand-800 dark:border-brand-500 dark:text-brand-300'
+              : 'border-transparent text-ink-500 hover:text-ink-700'
           }`}
           onClick={() => setActiveTab('pending')}
         >
@@ -166,8 +167,8 @@ export function ApprovalPage() {
         <button
           className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'all'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-brand-600 text-brand-800 dark:border-brand-500 dark:text-brand-300'
+              : 'border-transparent text-ink-500 hover:text-ink-700'
           }`}
           onClick={() => setActiveTab('all')}
         >
@@ -201,82 +202,86 @@ export function ApprovalPage() {
         </div>
       )}
 
-      {isLoading && <p className="text-sm text-slate-500">Loading...</p>}
+      {isLoading && <p className="text-sm text-ink-500">Loading…</p>}
 
       {!isLoading && approvals.length === 0 && (
-        <p className="text-sm text-slate-500">
-          {activeTab === 'pending' ? 'No pending approvals.' : 'No approvals found.'}
-        </p>
+        <EmptyState
+          icon="✅"
+          title={activeTab === 'pending' ? 'Nothing waiting on you' : 'No approvals found'}
+          description={activeTab === 'pending' ? "You're all caught up." : 'Approval requests from other modules will show up here.'}
+        />
       )}
 
       {approvals.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-700">
-                <th className="pb-2 font-medium text-slate-500">Type</th>
-                <th className="pb-2 font-medium text-slate-500">Entity</th>
-                <th className="pb-2 font-medium text-slate-500">Requested By</th>
-                <th className="pb-2 font-medium text-slate-500">Approver</th>
-                <th className="pb-2 font-medium text-slate-500">Status</th>
-                <th className="pb-2 font-medium text-slate-500">Due</th>
-                <th className="pb-2 font-medium text-slate-500">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {approvals.map((a: Approval) => (
-                <tr key={a.id}>
-                  <td className="py-2">
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${TYPE_BADGE_CLASS[a.type] ?? ''}`}>
-                      {a.type.replace(/_/g, ' ')}
-                    </span>
-                  </td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">
-                    {a.entityType}: {a.entityId.slice(0, 8)}...
-                  </td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">
-                    {a.requestedBy?.name ?? '—'}
-                  </td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">
-                    {a.currentApprover?.name ?? '—'}
-                  </td>
-                  <td className="py-2"><StatusBadge status={a.status} /></td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">
-                    {new Date(a.dueAt).toLocaleDateString()}
-                  </td>
-                  <td className="py-2">
-                    {a.status === 'PENDING' || a.status === 'ESCALATED' ? (
-                      <div className="flex items-center gap-2">
-                        <button
-                          className="text-xs text-green-600 hover:underline"
-                          onClick={() => openDecide(a.id, 'approve')}
-                        >
-                          Approve
-                        </button>
-                        <button
-                          className="text-xs text-red-600 hover:underline"
-                          onClick={() => openDecide(a.id, 'reject')}
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    ) : a.status === 'APPROVED' ? (
-                      <span className="text-xs text-green-600">
-                        Approved by {a.decidedBy?.name ?? '—'}
-                      </span>
-                    ) : a.status === 'REJECTED' ? (
-                      <span className="text-xs text-red-600">
-                        Rejected by {a.decidedBy?.name ?? '—'}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-slate-400">—</span>
-                    )}
-                  </td>
+        <Card className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-ink-200 dark:border-ink-700">
+                  <th className="px-5 py-3 font-medium text-ink-500">Type</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Entity</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Requested By</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Approver</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Status</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Due</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
+                {approvals.map((a: Approval) => (
+                  <tr key={a.id} className="transition-colors hover:bg-ink-50/70 dark:hover:bg-ink-800/40">
+                    <td className="px-5 py-2.5">
+                      <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${TYPE_BADGE_CLASS[a.type] ?? ''}`}>
+                        {a.type.replace(/_/g, ' ')}
+                      </span>
+                    </td>
+                    <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">
+                      {a.entityType}: {a.entityId.slice(0, 8)}...
+                    </td>
+                    <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">
+                      {a.requestedBy?.name ?? '—'}
+                    </td>
+                    <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">
+                      {a.currentApprover?.name ?? '—'}
+                    </td>
+                    <td className="px-5 py-2.5"><StatusBadge status={a.status} /></td>
+                    <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">
+                      {new Date(a.dueAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-5 py-2.5">
+                      {a.status === 'PENDING' || a.status === 'ESCALATED' ? (
+                        <div className="flex items-center gap-3">
+                          <button
+                            className="text-xs font-medium text-emerald-600 hover:underline"
+                            onClick={() => openDecide(a.id, 'approve')}
+                          >
+                            Approve
+                          </button>
+                          <button
+                            className="text-xs font-medium text-red-600 hover:underline"
+                            onClick={() => openDecide(a.id, 'reject')}
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      ) : a.status === 'APPROVED' ? (
+                        <span className="text-xs text-emerald-600">
+                          Approved by {a.decidedBy?.name ?? '—'}
+                        </span>
+                      ) : a.status === 'REJECTED' ? (
+                        <span className="text-xs text-red-600">
+                          Rejected by {a.decidedBy?.name ?? '—'}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-ink-400">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       )}
 
       <Modal open={!!decideId} onClose={() => setDecideId(null)} title={`${decideAction === 'approve' ? 'Approve' : 'Reject'} Request`}>

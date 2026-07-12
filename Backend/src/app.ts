@@ -16,6 +16,8 @@ import { maintenanceRoutes } from '@/modules/maintenance';
 import { auditRoutes } from '@/modules/audits';
 import { notificationRoutes, registerNotificationListeners } from '@/modules/notifications';
 import { approvalRoutes, registerApprovalListeners } from '@/modules/approvals';
+import { customObjectRoutes } from '@/modules/custom-objects';
+import { industryTemplateRoutes } from '@/modules/industry-templates';
 import { sendSuccess } from '@/utils/response';
 import { startJobs } from '@/jobs';
 
@@ -42,6 +44,8 @@ export function createApp(): Express {
   app.use('/api/v1/audits', auditRoutes);
   app.use('/api/v1/notifications', notificationRoutes);
   app.use('/api/v1/approvals', approvalRoutes);
+  app.use('/api/v1/custom-objects', customObjectRoutes);
+  app.use('/api/v1/industry-templates', industryTemplateRoutes);
 
   registerActivityLogListeners();
   registerNotificationListeners();
