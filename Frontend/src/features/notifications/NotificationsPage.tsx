@@ -59,7 +59,7 @@ export function NotificationsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-ink-900 dark:text-white">Notifications</h1>
+        <h1 className="font-display text-2xl font-semibold text-ink-900 text-black">Notifications</h1>
         <p className="text-sm text-ink-500">System alerts and status updates.</p>
       </div>
 
@@ -89,7 +89,7 @@ export function NotificationsPage() {
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-ink-900 dark:text-white">{n.title}</span>
+                  <span className="text-sm font-medium text-ink-900 text-black">{n.title}</span>
                   <Badge variant="default">{TYPE_LABELS[n.type] ?? n.type}</Badge>
                   {!n.isRead && <Badge variant="brand">New</Badge>}
                 </div>

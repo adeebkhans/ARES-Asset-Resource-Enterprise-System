@@ -56,7 +56,7 @@ export function CustomObjectsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-ink-900 dark:text-white">Custom Objects</h1>
+          <h1 className="font-display text-2xl font-semibold text-ink-900 text-black">Custom Objects</h1>
           <p className="text-sm text-ink-500">
             Define entities specific to your business — Patients, Guests, Classrooms — with their own fields, forms, and lists.
           </p>
@@ -82,7 +82,7 @@ export function CustomObjectsPage() {
               <Card className="flex h-full flex-col gap-2 transition-shadow hover:shadow-md">
                 <div className="flex items-center gap-2">
                    <span className="text-2xl">{obj.icon || <i className="ph-bold ph-puzzle-piece" />}</span>
-                  <span className="font-display font-semibold text-ink-900 dark:text-white">{obj.pluralLabel}</span>
+                  <span className="font-display font-semibold text-ink-900 text-black">{obj.pluralLabel}</span>
                 </div>
                 {obj.description && <p className="text-sm text-ink-500">{obj.description}</p>}
                 <div className="mt-auto pt-2 text-xs font-medium text-brand-600 dark:text-brand-400">

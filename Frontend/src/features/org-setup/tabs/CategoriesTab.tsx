@@ -6,10 +6,13 @@ import { Modal } from '@/components/ui/Modal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ApiRequestError } from '@/types/api.types';
 import { listCategories, createCategory, updateCategory, deleteCategory } from '@/features/asset-categories/api';
+import { useAuthStore } from '@/store/auth.store';
 import type { AssetCategory } from '@/types/domain.types';
 
 export function CategoriesTab() {
   const queryClient = useQueryClient();
+  // Only Admin can delete a category — DELETE /asset-categories/:id is Admin-only server-side.
+  const isAdmin = useAuthStore((s) => s.user?.role) === 'ADMIN';
   const [showCreate, setShowCreate] = useState(false);
   const [editCat, setEditCat] = useState<AssetCategory | null>(null);
   const [newName, setNewName] = useState('');
@@ -84,7 +87,7 @@ export function CategoriesTab() {
             <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
               {categories.map((cat: AssetCategory) => (
                 <tr key={cat.id}>
-                  <td className="py-2 font-medium text-ink-900 dark:text-white">{cat.name}</td>
+                  <td className="py-2 font-medium text-ink-900 text-black">{cat.name}</td>
                   <td className="py-2 text-ink-600 dark:text-ink-400">{cat.description ?? '—'}</td>
                   <td className="py-2 text-ink-600 dark:text-ink-400">{cat._count?.assets ?? 0}</td>
                   <td className="py-2 text-right">
@@ -95,13 +98,15 @@ export function CategoriesTab() {
                       >
                         Edit
                       </Button>
-                      <Button
-                        variant="secondary"
-                        onClick={() => deleteMutation.mutate(cat.id)}
-                        isLoading={deleteMutation.isPending}
-                      >
-                        Delete
-                      </Button>
+                      {isAdmin && (
+                        <Button
+                          variant="secondary"
+                          onClick={() => deleteMutation.mutate(cat.id)}
+                          isLoading={deleteMutation.isPending}
+                        >
+                          Delete
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>

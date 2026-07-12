@@ -52,7 +52,7 @@ export function TemplatesTab() {
           <Card key={t.tag} className="flex flex-col gap-3">
             <div className="flex items-center gap-2.5">
               <span className="text-2xl"><i className={`ph-bold ph-${TEMPLATE_ICON[t.tag] ?? 'puzzle-piece'}`} /></span>
-              <span className="font-display font-semibold text-ink-900 dark:text-white">{t.name}</span>
+              <span className="font-display font-semibold text-ink-900 text-black">{t.name}</span>
             </div>
             <p className="text-sm text-ink-500">{t.description}</p>
             <p className="text-xs text-ink-400">

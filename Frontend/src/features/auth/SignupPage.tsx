@@ -50,7 +50,7 @@ export function SignupPage() {
   return (
     <AuthLayout>
       <Card>
-        <h1 className="mb-1 font-display text-2xl font-semibold text-ink-900 dark:text-white">Join your organization</h1>
+        <h1 className="mb-1 font-display text-2xl font-semibold text-ink-900 text-black">Join your organization</h1>
         <p className="mb-6 text-sm text-ink-500">
           Creates an Employee account. An Admin can promote you later from the Employee Directory.
         </p>

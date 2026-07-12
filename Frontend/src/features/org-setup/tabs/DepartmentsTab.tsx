@@ -81,7 +81,7 @@ export function DepartmentsTab() {
             <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
               {departments.map((dept: Department) => (
                 <tr key={dept.id}>
-                  <td className="py-2 font-medium text-ink-900 dark:text-white">{dept.name}</td>
+                  <td className="py-2 font-medium text-ink-900 text-black">{dept.name}</td>
                   <td className="py-2 text-ink-600 dark:text-ink-400">
                     {dept.head?.name ?? '—'}
                   </td>

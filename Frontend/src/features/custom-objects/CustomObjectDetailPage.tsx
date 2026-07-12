@@ -138,7 +138,7 @@ export function CustomObjectDetailPage() {
         </Link>
         <div className="mt-1 flex items-center gap-2">
            <span className="text-2xl">{definition?.icon || <i className="ph-bold ph-puzzle-piece" />}</span>
-          <h1 className="font-display text-2xl font-semibold text-ink-900 dark:text-white">{definition?.pluralLabel ?? '…'}</h1>
+          <h1 className="font-display text-2xl font-semibold text-ink-900 text-black">{definition?.pluralLabel ?? '…'}</h1>
         </div>
         {definition?.description && <p className="text-sm text-ink-500">{definition.description}</p>}
       </div>

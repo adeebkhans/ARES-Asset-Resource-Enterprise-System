@@ -22,7 +22,8 @@ interface NavItem {
   to: string;
   label: string;
   phosphor: string;
-  adminOnly?: boolean;
+  /** Omit for "any authenticated role". */
+  roles?: Role[];
 }
 
 const NAV_SECTIONS: { heading: string; items: NavItem[] }[] = [
@@ -30,8 +31,8 @@ const NAV_SECTIONS: { heading: string; items: NavItem[] }[] = [
     heading: 'Overview',
     items: [
       { to: '/dashboard', label: 'Dashboard', phosphor: 'house' },
-      { to: '/reports', label: 'Reports', phosphor: 'chart-bar', adminOnly: true },
-      { to: '/activity-logs', label: 'Activity Log', phosphor: 'clock-counter-clockwise', adminOnly: true },
+      { to: '/reports', label: 'Reports', phosphor: 'chart-bar', roles: ['ADMIN'] },
+      { to: '/activity-logs', label: 'Activity Log', phosphor: 'clock-counter-clockwise', roles: ['ADMIN'] },
     ],
   },
   {
@@ -47,7 +48,9 @@ const NAV_SECTIONS: { heading: string; items: NavItem[] }[] = [
     heading: 'Configure',
     items: [
       { to: '/custom-objects', label: 'Custom Objects', phosphor: 'puzzle-piece' },
-      { to: '/org-setup', label: 'Org Setup', phosphor: 'buildings', adminOnly: true },
+      // Asset Manager holds backend permission to manage Asset Categories, so
+      // they need a way in too — OrgSetupPage hides the Admin-only tabs for them.
+      { to: '/org-setup', label: 'Org Setup', phosphor: 'buildings', roles: ['ADMIN', 'ASSET_MANAGER'] },
     ],
   },
 ];
@@ -84,7 +87,7 @@ export function AppShell() {
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-3 pb-4">
           {NAV_SECTIONS.map((section) => {
-            const items = section.items.filter((item) => !item.adminOnly || user?.role === 'ADMIN');
+            const items = section.items.filter((item) => !item.roles || (user?.role && item.roles.includes(user.role)));
             if (items.length === 0) return null;
             return (
               <div key={section.heading} className="mb-5">

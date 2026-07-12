@@ -34,7 +34,7 @@ export function EmployeesTab() {
   const [newRole, setNewRole] = useState<Role>('EMPLOYEE');
   const [editName, setEditName] = useState('');
   const [editDept, setEditDept] = useState('');
-  const [editStatus, setEditStatus] = useState('ACTIVE');
+  const [editStatus, setEditStatus] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE');
   const [error, setError] = useState('');
 
   const { data: employees = [], isLoading } = useQuery({
@@ -60,7 +60,7 @@ export function EmployeesTab() {
   });
 
   const editMutation = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: { name?: string; departmentId?: string | null; status?: string } }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: { name?: string; departmentId?: string | null; status?: 'ACTIVE' | 'INACTIVE' } }) =>
       updateEmployee(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
@@ -111,7 +111,7 @@ export function EmployeesTab() {
             <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
               {employees.map((emp: Employee) => (
                 <tr key={emp.id}>
-                  <td className="py-2 font-medium text-ink-900 dark:text-white">{emp.name}</td>
+                  <td className="py-2 font-medium text-ink-900 text-black">{emp.name}</td>
                   <td className="py-2 text-ink-600 dark:text-ink-400">{emp.email}</td>
                   <td className="py-2 text-ink-600 dark:text-ink-400">{ROLE_LABEL[emp.role]}</td>
                   <td className="py-2 text-ink-600 dark:text-ink-400">{emp.department?.name ?? '—'}</td>
@@ -125,7 +125,7 @@ export function EmployeesTab() {
                             setEditUser(emp);
                             setEditName(emp.name);
                             setEditDept(emp.departmentId ?? '');
-                            setEditStatus(emp.status);
+                            setEditStatus(emp.status as 'ACTIVE' | 'INACTIVE');
                             setError('');
                           }}
                         >
@@ -202,7 +202,7 @@ export function EmployeesTab() {
             label="Status"
             options={[{ value: 'ACTIVE', label: 'Active' }, { value: 'INACTIVE', label: 'Inactive' }]}
             value={editStatus}
-            onChange={(e) => setEditStatus(e.target.value)}
+            onChange={(e) => setEditStatus(e.target.value as 'ACTIVE' | 'INACTIVE')}
           />
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" isLoading={editMutation.isPending}>Save Changes</Button>

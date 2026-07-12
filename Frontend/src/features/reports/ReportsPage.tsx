@@ -41,7 +41,7 @@ export function ReportsPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="font-display text-3xl font-semibold text-ink-900 dark:text-white">Reports & Analytics</h1>
+        <h1 className="font-display text-3xl font-semibold text-ink-900 text-black">Reports & Analytics</h1>
         <p className="text-sm text-ink-500">Organizational intelligence at a glance</p>
       </div>
 
@@ -50,7 +50,7 @@ export function ReportsPage() {
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-500">Asset Utilization</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Card className="flex flex-col items-center justify-center p-6">
-            <span className="font-display text-4xl font-bold text-ink-900 dark:text-white">{au.totalAssets}</span>
+            <span className="font-display text-4xl font-bold text-ink-900 text-black">{au.totalAssets}</span>
             <span className="text-xs text-ink-500">Total Assets</span>
           </Card>
           <Card className="flex flex-col items-center justify-center p-6">
@@ -62,7 +62,7 @@ export function ReportsPage() {
             {Object.entries(au.byStatus).map(([status, count]) => (
               <div key={status} className="flex justify-between text-sm">
                 <span className="text-ink-600 dark:text-ink-400">{status.replace(/_/g, ' ')}</span>
-                <span className="font-medium text-ink-900 dark:text-white">{count}</span>
+                <span className="font-medium text-ink-900 text-black">{count}</span>
               </div>
             ))}
           </Card>
@@ -90,17 +90,17 @@ export function ReportsPage() {
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-500">Maintenance Performance</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
           <Card className="p-6">
-            <span className="block font-display text-3xl font-bold text-ink-900 dark:text-white">{m.totalRequests}</span>
+            <span className="block font-display text-3xl font-bold text-ink-900 text-black">{m.totalRequests}</span>
             <span className="text-xs text-ink-500">Total Requests</span>
           </Card>
           <Card className="flex flex-col items-center justify-center p-6">
-            <span className="text-3xl font-bold text-ink-900 dark:text-white">
+            <span className="text-3xl font-bold text-ink-900 text-black">
               {m.averageResolutionDays ?? '—'}
             </span>
             <span className="text-xs text-ink-500">Avg Days to Resolve</span>
           </Card>
           <Card className="flex flex-col items-center justify-center p-6">
-            <span className="flex items-center gap-2 text-3xl font-bold text-ink-900 dark:text-white">
+            <span className="flex items-center gap-2 text-3xl font-bold text-ink-900 text-black">
               {m.resolvedThisMonth}
               <TrendArrow trend={m.trend} />
             </span>
@@ -111,7 +111,7 @@ export function ReportsPage() {
             {Object.entries(m.byPriority).map(([p, count]) => (
               <div key={p} className="flex justify-between text-sm">
                 <span className="text-ink-600 dark:text-ink-400">{p}</span>
-                <span className="font-medium text-ink-900 dark:text-white">{count}</span>
+                <span className="font-medium text-ink-900 text-black">{count}</span>
               </div>
             ))}
           </Card>
@@ -138,10 +138,10 @@ export function ReportsPage() {
               <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
                 {rf.map((a) => (
                   <tr key={a.assetId} className="hover:bg-ink-50 dark:hover:bg-ink-800/50">
-                    <td className="px-4 py-2.5 font-medium text-ink-900 dark:text-white">{a.assetTag}</td>
+                    <td className="px-4 py-2.5 font-medium text-ink-900 text-black">{a.assetTag}</td>
                     <td className="px-4 py-2.5 text-ink-700 dark:text-ink-300">{a.name}</td>
                     <td className="px-4 py-2.5 text-ink-600 dark:text-ink-400">{a.category}</td>
-                    <td className="px-4 py-2.5 text-right font-medium text-ink-900 dark:text-white">{a.ageMonths}</td>
+                    <td className="px-4 py-2.5 text-right font-medium text-ink-900 text-black">{a.ageMonths}</td>
                     <td className="px-4 py-2.5">
                       <span className="inline-block rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
                         {a.status.replace(/_/g, ' ')}
@@ -160,7 +160,7 @@ export function ReportsPage() {
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-500">Audit Summary</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Card className="p-6">
-            <span className="block font-display text-3xl font-bold text-ink-900 dark:text-white">{auditSummary.totalCycles}</span>
+            <span className="block font-display text-3xl font-bold text-ink-900 text-black">{auditSummary.totalCycles}</span>
             <span className="text-xs text-ink-500">Total Cycles</span>
           </Card>
           <Card className="p-6">

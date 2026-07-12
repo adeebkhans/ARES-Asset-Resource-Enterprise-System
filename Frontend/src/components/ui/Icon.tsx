@@ -1,5 +1,3 @@
-import { type ReactNode } from 'react';
-
 /**
  * Thin wrapper around Phosphor icon web components.
  * Usage: <Icon name="house" weight="fill" />

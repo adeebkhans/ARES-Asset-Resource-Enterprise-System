@@ -140,7 +140,7 @@ export function MaintenancePage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-ink-900 dark:text-white">Maintenance</h1>
+          <h1 className="font-display text-2xl font-semibold text-ink-900 text-black">Maintenance</h1>
           <p className="text-sm text-ink-500">Track and resolve asset maintenance requests.</p>
         </div>
         <Button onClick={() => { setShowCreate(true); setError(''); resetCreate(); }}>+ Raise Request</Button>
@@ -150,7 +150,7 @@ export function MaintenancePage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {Object.entries(statusCounts as Record<string, number>).map(([status, count]) => (
             <Card key={status} className="flex flex-col items-center gap-1 py-3">
-              <span className="font-display text-2xl font-bold text-ink-900 dark:text-white">{count}</span>
+              <span className="font-display text-2xl font-bold text-ink-900 text-black">{count}</span>
               <span className="text-xs text-ink-500">{status.replace(/_/g, ' ')}</span>
             </Card>
           ))}
@@ -197,7 +197,7 @@ export function MaintenancePage() {
               <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
                 {requests.map((req: MaintenanceRequest) => (
                   <tr key={req.id} className="transition-colors hover:bg-ink-50/70 dark:hover:bg-ink-800/40">
-                    <td className="px-5 py-2.5 font-medium text-ink-900 dark:text-white">
+                    <td className="px-5 py-2.5 font-medium text-ink-900 text-black">
                       {req.asset?.name ?? req.assetId}
                     </td>
                     <td className="max-w-xs truncate px-5 py-2.5 text-ink-600 dark:text-ink-400">
