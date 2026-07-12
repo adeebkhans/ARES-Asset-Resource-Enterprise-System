@@ -23,6 +23,9 @@ const NAV_LINKS: { to: string; label: string; adminOnly?: boolean }[] = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/org-setup', label: 'Org Setup', adminOnly: true },
   { to: '/assets', label: 'Assets' },
+  { to: '/maintenance', label: 'Maintenance' },
+  { to: '/audits', label: 'Audits' },
+  { to: '/notifications', label: 'Notifications' },
 ];
 
 export function AppShell() {

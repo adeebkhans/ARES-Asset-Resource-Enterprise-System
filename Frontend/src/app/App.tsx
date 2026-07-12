@@ -9,6 +9,9 @@ import { RegisterOrganizationPage } from '@/features/auth/RegisterOrganizationPa
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { OrgSetupPage } from '@/features/org-setup/OrgSetupPage';
 import { AssetsPage } from '@/features/assets/AssetsPage';
+import { MaintenancePage } from '@/features/maintenance/MaintenancePage';
+import { AuditPage } from '@/features/audits/AuditPage';
+import { NotificationsPage } from '@/features/notifications/NotificationsPage';
 
 export function App() {
   return (
@@ -23,6 +26,9 @@ export function App() {
             <Route element={<AppShell />}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/assets" element={<AssetsPage />} />
+              <Route path="/maintenance" element={<MaintenancePage />} />
+              <Route path="/audits" element={<AuditPage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
               {/* Organization Setup is Admin-only per the brief — Departments/Categories/Employee Directory. */}
               <Route element={<RequireRole roles={['ADMIN']} />}>
                 <Route path="/org-setup" element={<OrgSetupPage />} />
