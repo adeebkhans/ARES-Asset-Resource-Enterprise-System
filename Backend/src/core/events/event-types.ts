@@ -6,7 +6,7 @@
  * Phase 0: identity/asset lifecycle events.
  * Phase 3: maintenance, audit, and notification events appended.
  */
-import { AssetStatus, AssetStatusChangeSource, MaintenancePriority, MaintenanceStatus, AuditResult } from '@prisma/client';
+import { AssetStatus, AssetStatusChangeSource, MaintenancePriority, MaintenanceStatus, AuditResult, ApprovalType } from '@prisma/client';
 
 export interface DomainEventMap {
   // Phase 0 — Identity & Asset Lifecycle
@@ -70,6 +70,46 @@ export interface DomainEventMap {
     userId: string;
     type: string;
     title: string;
+  };
+
+  // Phase 4 — Approvals
+  'approval.requested': {
+    approvalId: string;
+    orgId: string;
+    type: ApprovalType;
+    entityType: string;
+    entityId: string;
+    requestedById: string;
+    currentApproverUserId: string | null;
+    dueAt: Date;
+  };
+  'approval.approved': {
+    approvalId: string;
+    orgId: string;
+    type: ApprovalType;
+    entityType: string;
+    entityId: string;
+    decidedById: string;
+    comment?: string;
+  };
+  'approval.rejected': {
+    approvalId: string;
+    orgId: string;
+    type: ApprovalType;
+    entityType: string;
+    entityId: string;
+    decidedById: string;
+    comment?: string;
+  };
+  'approval.escalated': {
+    approvalId: string;
+    orgId: string;
+    type: ApprovalType;
+    entityType: string;
+    entityId: string;
+    previousApproverUserId: string;
+    newApproverUserId: string;
+    dueAt: Date;
   };
 }
 
