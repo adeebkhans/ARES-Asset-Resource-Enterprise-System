@@ -6,6 +6,8 @@ import { LoginPage } from '@/features/auth/LoginPage';
 import { SignupPage } from '@/features/auth/SignupPage';
 import { RegisterOrganizationPage } from '@/features/auth/RegisterOrganizationPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
+import { OrgSetupPage } from '@/features/org-setup/OrgSetupPage';
+import { AssetsPage } from '@/features/assets/AssetsPage';
 
 export function App() {
   return (
@@ -19,6 +21,8 @@ export function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<AppShell />}>
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/org-setup" element={<OrgSetupPage />} />
+              <Route path="/assets" element={<AssetsPage />} />
             </Route>
           </Route>
 

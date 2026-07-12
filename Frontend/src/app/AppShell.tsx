@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/ui/Button';
@@ -19,11 +19,12 @@ const ROLE_BADGE_CLASS: Record<Role, string> = {
   EMPLOYEE: 'bg-role-employee/10 text-role-employee',
 };
 
-/**
- * Shell for every authenticated route. The role badge here is deliberately
- * visible everywhere — Phase 6 replaces the dashboard body with genuinely
- * different per-role layouts (plan.md §8.5); this shell is what stays constant.
- */
+const NAV_LINKS = [
+  { to: '/dashboard', label: 'Dashboard' },
+  { to: '/org-setup', label: 'Org Setup' },
+  { to: '/assets', label: 'Assets' },
+];
+
 export function AppShell() {
   const navigate = useNavigate();
   const { user, refreshToken, clear } = useAuthStore();
@@ -39,8 +40,28 @@ export function AppShell() {
   return (
     <div className="min-h-svh">
       <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3 dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-6">
           <span className="text-lg font-semibold text-slate-900 dark:text-white">ARES</span>
+          <nav className="flex items-center gap-1">
+            {NAV_LINKS.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({ isActive }) =>
+                  clsx(
+                    'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                    isActive
+                      ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
+                  )
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+        <div className="flex items-center gap-3">
           {user && (
             <span
               className={clsx('rounded-full px-2.5 py-0.5 text-xs font-medium', ROLE_BADGE_CLASS[user.role])}
@@ -48,8 +69,6 @@ export function AppShell() {
               {ROLE_LABEL[user.role]}
             </span>
           )}
-        </div>
-        <div className="flex items-center gap-3">
           {user && <span className="text-sm text-slate-600 dark:text-slate-300">{user.name}</span>}
           <Button variant="secondary" onClick={handleLogout}>
             Log out

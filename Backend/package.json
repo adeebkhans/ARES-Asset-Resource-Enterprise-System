@@ -19,7 +19,7 @@
     "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^5.20.0",
+    "@prisma/client": "^6.19.3",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -47,7 +47,7 @@
     "@typescript-eslint/parser": "^8.7.0",
     "eslint": "^8.57.0",
     "pino-pretty": "^11.2.2",
-    "prisma": "^5.20.0",
+    "prisma": "^6.19.3",
     "supertest": "^7.0.0",
     "tsc-alias": "^1.8.10",
     "tsx": "^4.19.1",
