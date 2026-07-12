@@ -7,6 +7,11 @@ import { env } from '@/config/env';
 import { logger } from '@/config/logger';
 import { errorHandler, notFoundHandler } from '@/core/errors/errorHandler';
 import { authRoutes } from '@/modules/auth';
+import { departmentRoutes } from '@/modules/departments';
+import { assetCategoryRoutes } from '@/modules/asset-categories';
+import { employeeRoutes } from '@/modules/employees';
+import { assetRoutes } from '@/modules/assets';
+import { activityLogRoutes, registerActivityLogListeners } from '@/modules/activity-logs';
 import { sendSuccess } from '@/utils/response';
 
 export function createApp(): Express {
@@ -23,6 +28,13 @@ export function createApp(): Express {
   });
 
   app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/departments', departmentRoutes);
+  app.use('/api/v1/asset-categories', assetCategoryRoutes);
+  app.use('/api/v1/employees', employeeRoutes);
+  app.use('/api/v1/assets', assetRoutes);
+  app.use('/api/v1/activity-logs', activityLogRoutes);
+
+  registerActivityLogListeners();
 
   app.use(notFoundHandler);
   app.use(errorHandler);
