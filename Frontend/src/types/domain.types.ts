@@ -221,3 +221,66 @@ export interface ApprovalDelegation {
   delegate?: { id: string; name: string };
   delegator?: { id: string; name: string };
 }
+
+// ---------------------------------------------------------------------------
+// Phase 5 — Configurable Object Framework
+// ---------------------------------------------------------------------------
+
+export type CustomFieldType = 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN' | 'SELECT' | 'MULTISELECT' | 'RELATION';
+export type CustomFieldTargetType = 'ASSET_CATEGORY' | 'CUSTOM_OBJECT';
+export type RelationTarget = 'ASSET' | 'USER' | 'DEPARTMENT' | 'CUSTOM_OBJECT';
+
+export interface CustomFieldDefinition {
+  id: string;
+  orgId: string;
+  targetType: CustomFieldTargetType;
+  categoryId: string | null;
+  objectDefinitionId: string | null;
+  fieldKey: string;
+  label: string;
+  fieldType: CustomFieldType;
+  options: string[];
+  isRequired: boolean;
+  relationTarget: RelationTarget | null;
+  relationObjectDefinitionId: string | null;
+  sortOrder: number;
+}
+
+export interface CustomObjectDefinition {
+  id: string;
+  orgId: string;
+  key: string;
+  label: string;
+  pluralLabel: string;
+  icon: string | null;
+  description: string | null;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { records: number };
+}
+
+export interface CustomObjectRecord {
+  id: string;
+  orgId: string;
+  objectDefinitionId: string;
+  data: Record<string, unknown>;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IndustryTemplateSummary {
+  tag: string;
+  name: string;
+  description: string;
+  categoryCount: number;
+  objectCount: number;
+}
+
+export interface ApplyTemplateResult {
+  categoriesCreated: string[];
+  categoriesSkipped: string[];
+  objectsCreated: string[];
+  objectsSkipped: string[];
+}

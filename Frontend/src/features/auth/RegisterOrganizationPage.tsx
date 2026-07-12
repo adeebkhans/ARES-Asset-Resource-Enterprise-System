@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/Card';
 import { useAuthStore } from '@/store/auth.store';
 import { ApiRequestError } from '@/types/api.types';
 import { registerOrganization } from './api';
+import { AuthLayout } from './AuthLayout';
 
 const schema = z.object({
   organizationName: z.string().min(2, 'Organization name is required'),
@@ -43,10 +44,10 @@ export function RegisterOrganizationPage() {
   });
 
   return (
-    <div className="flex min-h-svh items-center justify-center px-4">
-      <Card className="w-full max-w-sm">
-        <h1 className="mb-1 text-xl font-semibold text-slate-900 dark:text-white">Set up a new organization</h1>
-        <p className="mb-6 text-sm text-slate-500">You'll be the Admin for this organization.</p>
+    <AuthLayout>
+      <Card>
+        <h1 className="mb-1 font-display text-2xl font-semibold text-ink-900 dark:text-white">Set up your organization</h1>
+        <p className="mb-6 text-sm text-ink-500">You'll be the Admin for this organization.</p>
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit((values) => mutation.mutate(values))}>
           <Input label="Organization name" error={errors.organizationName?.message} {...register('organizationName')} />
@@ -67,12 +68,12 @@ export function RegisterOrganizationPage() {
           </Button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-slate-500">
-          <Link to="/login" className="hover:underline">
+        <div className="mt-6 text-center text-sm text-ink-500">
+          <Link to="/login" className="text-brand-700 hover:underline dark:text-brand-400">
             Already have an account? Log in
           </Link>
         </div>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }

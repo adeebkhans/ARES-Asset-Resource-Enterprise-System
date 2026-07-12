@@ -1,15 +1,18 @@
 import { useState } from 'react';
+import clsx from 'clsx';
 import { Card } from '@/components/ui/Card';
 import { DepartmentsTab } from './tabs/DepartmentsTab';
 import { CategoriesTab } from './tabs/CategoriesTab';
 import { EmployeesTab } from './tabs/EmployeesTab';
+import { TemplatesTab } from './tabs/TemplatesTab';
 
-type Tab = 'departments' | 'categories' | 'employees';
+type Tab = 'departments' | 'categories' | 'employees' | 'templates';
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: 'departments', label: 'Departments' },
-  { key: 'categories', label: 'Asset Categories' },
-  { key: 'employees', label: 'Employee Directory' },
+const TABS: { key: Tab; label: string; icon: string }[] = [
+  { key: 'departments', label: 'Departments', icon: '🏢' },
+  { key: 'categories', label: 'Asset Categories', icon: '🏷️' },
+  { key: 'employees', label: 'Employee Directory', icon: '👥' },
+  { key: 'templates', label: 'Industry Templates', icon: '✨' },
 ];
 
 export function OrgSetupPage() {
@@ -18,32 +21,33 @@ export function OrgSetupPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Organization Setup</h1>
-        <p className="text-sm text-slate-500">Manage departments, asset categories, and your team.</p>
+        <h1 className="font-display text-2xl font-semibold text-ink-900 dark:text-white">Organization Setup</h1>
+        <p className="text-sm text-ink-500">Manage departments, asset categories, your team, and how this org is configured.</p>
       </div>
 
-      <div className="border-b border-slate-200 dark:border-slate-800">
-        <nav className="-mb-px flex gap-6">
-          {TABS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`border-b-2 px-1 pb-3 text-sm font-medium transition-colors ${
-                activeTab === tab.key
-                  ? 'border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
+      <div className="flex gap-1 border-b border-ink-200 dark:border-ink-800">
+        {TABS.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={clsx(
+              'flex items-center gap-1.5 border-b-2 px-3 pb-3 text-sm font-medium transition-colors',
+              activeTab === tab.key
+                ? 'border-brand-600 text-brand-800 dark:border-brand-500 dark:text-brand-300'
+                : 'border-transparent text-ink-500 hover:text-ink-800 dark:hover:text-ink-200',
+            )}
+          >
+            <span>{tab.icon}</span>
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <Card>
         {activeTab === 'departments' && <DepartmentsTab />}
         {activeTab === 'categories' && <CategoriesTab />}
         {activeTab === 'employees' && <EmployeesTab />}
+        {activeTab === 'templates' && <TemplatesTab />}
       </Card>
     </div>
   );

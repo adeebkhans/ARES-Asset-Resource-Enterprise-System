@@ -9,6 +9,7 @@ import { Select } from '@/components/ui/Select';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
 import { StatusBadge } from '@/components/ui/Badge';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { ApiRequestError } from '@/types/api.types';
 import {
   searchMaintenance,
@@ -35,7 +36,7 @@ const STATUS_OPTIONS = [
 ];
 
 const PRIORITY_BADGE_CLASS: Record<string, string> = {
-  LOW: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+  LOW: 'bg-ink-100 text-ink-700 dark:bg-ink-800 dark:text-ink-300',
   MEDIUM: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
   HIGH: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
   CRITICAL: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
@@ -137,17 +138,20 @@ export function MaintenancePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Maintenance</h1>
-        <p className="text-sm text-slate-500">Track and resolve asset maintenance requests.</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-semibold text-ink-900 dark:text-white">Maintenance</h1>
+          <p className="text-sm text-ink-500">Track and resolve asset maintenance requests.</p>
+        </div>
+        <Button onClick={() => { setShowCreate(true); setError(''); resetCreate(); }}>+ Raise Request</Button>
       </div>
 
       {statusCounts && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {Object.entries(statusCounts as Record<string, number>).map(([status, count]) => (
             <Card key={status} className="flex flex-col items-center gap-1 py-3">
-              <span className="text-2xl font-bold text-slate-900 dark:text-white">{count}</span>
-              <span className="text-xs text-slate-500">{status.replace(/_/g, ' ')}</span>
+              <span className="font-display text-2xl font-bold text-ink-900 dark:text-white">{count}</span>
+              <span className="text-xs text-ink-500">{status.replace(/_/g, ' ')}</span>
             </Card>
           ))}
         </div>
@@ -168,68 +172,67 @@ export function MaintenancePage() {
           onChange={(e) => setStatusFilter(e.target.value as MaintenanceStatus | '')}
           className="w-48"
         />
-        <Button onClick={() => { setShowCreate(true); setError(''); resetCreate(); }}>
-          Raise Request
-        </Button>
       </div>
 
-      {isLoading && <p className="text-sm text-slate-500">Loading...</p>}
+      {isLoading && <p className="text-sm text-ink-500">Loading…</p>}
 
       {!isLoading && requests.length === 0 && (
-        <p className="text-sm text-slate-500">No maintenance requests found.</p>
+        <EmptyState icon="🔧" title="No maintenance requests" description="Requests raised against your assets will show up here." />
       )}
 
       {requests.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-700">
-                <th className="pb-2 font-medium text-slate-500">Asset</th>
-                <th className="pb-2 font-medium text-slate-500">Issue</th>
-                <th className="pb-2 font-medium text-slate-500">Priority</th>
-                <th className="pb-2 font-medium text-slate-500">Raised By</th>
-                <th className="pb-2 font-medium text-slate-500">Status</th>
-                <th className="pb-2 font-medium text-slate-500">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {requests.map((req: MaintenanceRequest) => (
-                <tr key={req.id}>
-                  <td className="py-2 font-medium text-slate-900 dark:text-white">
-                    {req.asset?.name ?? req.assetId}
-                  </td>
-                  <td className="py-2 max-w-xs truncate text-slate-600 dark:text-slate-400">
-                    {req.issueDescription}
-                  </td>
-                  <td className="py-2">
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${PRIORITY_BADGE_CLASS[req.priority] ?? ''}`}>
-                      {req.priority}
-                    </span>
-                  </td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">
-                    {req.raisedBy?.name ?? '—'}
-                  </td>
-                  <td className="py-2"><StatusBadge status={req.status} /></td>
-                  <td className="py-2">
-                    <div className="flex items-center gap-1">
-                      {req.status === 'PENDING' && (
-                        <span className="text-xs text-amber-600">Awaiting Approval</span>
-                      )}
-                      {req.status === 'APPROVED' && (
-                        <button
-                          className="text-xs text-blue-600 hover:underline"
-                          onClick={() => { setShowResolve(req.id); resetResolve(); }}
-                        >
-                          Resolve
-                        </button>
-                      )}
-                    </div>
-                  </td>
+        <Card className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-ink-200 dark:border-ink-700">
+                  <th className="px-5 py-3 font-medium text-ink-500">Asset</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Issue</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Priority</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Raised By</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Status</th>
+                  <th className="px-5 py-3 font-medium text-ink-500">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
+                {requests.map((req: MaintenanceRequest) => (
+                  <tr key={req.id} className="transition-colors hover:bg-ink-50/70 dark:hover:bg-ink-800/40">
+                    <td className="px-5 py-2.5 font-medium text-ink-900 dark:text-white">
+                      {req.asset?.name ?? req.assetId}
+                    </td>
+                    <td className="max-w-xs truncate px-5 py-2.5 text-ink-600 dark:text-ink-400">
+                      {req.issueDescription}
+                    </td>
+                    <td className="px-5 py-2.5">
+                      <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${PRIORITY_BADGE_CLASS[req.priority] ?? ''}`}>
+                        {req.priority}
+                      </span>
+                    </td>
+                    <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">
+                      {req.raisedBy?.name ?? '—'}
+                    </td>
+                    <td className="px-5 py-2.5"><StatusBadge status={req.status} /></td>
+                    <td className="px-5 py-2.5">
+                      <div className="flex items-center gap-1">
+                        {req.status === 'PENDING' && (
+                          <span className="text-xs text-amber-600">Awaiting Approval</span>
+                        )}
+                        {req.status === 'APPROVED' && (
+                          <button
+                            className="text-xs font-medium text-brand-700 hover:underline dark:text-brand-400"
+                            onClick={() => { setShowResolve(req.id); resetResolve(); }}
+                          >
+                            Resolve
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       )}
 
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Raise Maintenance Request">

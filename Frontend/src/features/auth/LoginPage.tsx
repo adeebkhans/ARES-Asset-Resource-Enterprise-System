@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/Card';
 import { useAuthStore } from '@/store/auth.store';
 import { ApiRequestError } from '@/types/api.types';
 import { login } from './api';
+import { AuthLayout } from './AuthLayout';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -40,10 +41,10 @@ export function LoginPage() {
   });
 
   return (
-    <div className="flex min-h-svh items-center justify-center px-4">
-      <Card className="w-full max-w-sm">
-        <h1 className="mb-1 text-xl font-semibold text-slate-900 dark:text-white">Log in to ARES</h1>
-        <p className="mb-6 text-sm text-slate-500">Enterprise Asset &amp; Resource Management</p>
+    <AuthLayout>
+      <Card>
+        <h1 className="mb-1 font-display text-2xl font-semibold text-ink-900 dark:text-white">Welcome back</h1>
+        <p className="mb-6 text-sm text-ink-500">Log in to your organization's workspace.</p>
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit((values) => mutation.mutate(values))}>
           <Input label="Email" type="email" autoComplete="email" error={errors.email?.message} {...register('email')} />
@@ -62,15 +63,15 @@ export function LoginPage() {
           </Button>
         </form>
 
-        <div className="mt-6 flex flex-col gap-1 text-center text-sm text-slate-500">
-          <Link to="/signup" className="hover:underline">
+        <div className="mt-6 flex flex-col gap-1 text-center text-sm text-ink-500">
+          <Link to="/signup" className="text-brand-700 hover:underline dark:text-brand-400">
             Join an existing organization
           </Link>
-          <Link to="/register-organization" className="hover:underline">
+          <Link to="/register-organization" className="text-brand-700 hover:underline dark:text-brand-400">
             Set up a new organization
           </Link>
         </div>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }

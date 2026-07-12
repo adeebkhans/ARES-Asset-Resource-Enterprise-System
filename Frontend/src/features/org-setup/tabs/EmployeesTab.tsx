@@ -52,7 +52,7 @@ export function EmployeesTab() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Employee Directory</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-500">Employee Directory</h3>
         <Input
           label=""
           placeholder="Search by name or email..."
@@ -62,10 +62,10 @@ export function EmployeesTab() {
         />
       </div>
 
-      {isLoading && <p className="text-sm text-slate-500">Loading...</p>}
+      {isLoading && <p className="text-sm text-ink-500">Loading...</p>}
 
       {!isLoading && employees.length === 0 && (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-ink-500">
           {search ? 'No employees match your search.' : 'No employees yet.'}
         </p>
       )}
@@ -74,26 +74,26 @@ export function EmployeesTab() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-700">
-                <th className="pb-2 font-medium text-slate-500">Name</th>
-                <th className="pb-2 font-medium text-slate-500">Email</th>
-                <th className="pb-2 font-medium text-slate-500">Role</th>
-                <th className="pb-2 font-medium text-slate-500">Department</th>
-                <th className="pb-2 font-medium text-slate-500">Status</th>
-                <th className="pb-2 font-medium text-slate-500"></th>
+              <tr className="border-b border-ink-200 dark:border-ink-700">
+                <th className="pb-2 font-medium text-ink-500">Name</th>
+                <th className="pb-2 font-medium text-ink-500">Email</th>
+                <th className="pb-2 font-medium text-ink-500">Role</th>
+                <th className="pb-2 font-medium text-ink-500">Department</th>
+                <th className="pb-2 font-medium text-ink-500">Status</th>
+                <th className="pb-2 font-medium text-ink-500"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
               {employees.map((emp: Employee) => (
                 <tr key={emp.id}>
-                  <td className="py-2 font-medium text-slate-900 dark:text-white">{emp.name}</td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">{emp.email}</td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">{ROLE_LABEL[emp.role]}</td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">{emp.department?.name ?? '—'}</td>
+                  <td className="py-2 font-medium text-ink-900 dark:text-white">{emp.name}</td>
+                  <td className="py-2 text-ink-600 dark:text-ink-400">{emp.email}</td>
+                  <td className="py-2 text-ink-600 dark:text-ink-400">{ROLE_LABEL[emp.role]}</td>
+                  <td className="py-2 text-ink-600 dark:text-ink-400">{emp.department?.name ?? '—'}</td>
                   <td className="py-2"><StatusBadge status={emp.status} /></td>
                   <td className="py-2 text-right">
                     {emp.id === currentUserId ? (
-                      <span className="text-xs text-slate-400">You can't change your own role</span>
+                      <span className="text-xs text-ink-400">You can't change your own role</span>
                     ) : (
                       <Button
                         variant="secondary"

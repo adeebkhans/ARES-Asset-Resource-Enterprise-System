@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { ApiRequestError } from '@/types/api.types';
 import { listCategories, createCategory, deleteCategory } from '@/features/asset-categories/api';
 import type { AssetCategory } from '@/types/domain.types';
@@ -41,33 +42,33 @@ export function CategoriesTab() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Asset Categories</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-500">Asset Categories</h3>
         <Button onClick={() => setShowCreate(true)}>Add Category</Button>
       </div>
 
-      {isLoading && <p className="text-sm text-slate-500">Loading...</p>}
+      {isLoading && <p className="text-sm text-ink-500">Loading...</p>}
 
       {!isLoading && categories.length === 0 && (
-        <p className="text-sm text-slate-500">No categories yet. Create one to start registering assets.</p>
+        <EmptyState icon="🏷️" title="No categories yet" description="Create a category to start registering assets under it." action={<Button onClick={() => setShowCreate(true)}>Add Category</Button>} />
       )}
 
       {categories.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-700">
-                <th className="pb-2 font-medium text-slate-500">Name</th>
-                <th className="pb-2 font-medium text-slate-500">Description</th>
-                <th className="pb-2 font-medium text-slate-500">Assets</th>
-                <th className="pb-2 font-medium text-slate-500"></th>
+              <tr className="border-b border-ink-200 dark:border-ink-700">
+                <th className="pb-2 font-medium text-ink-500">Name</th>
+                <th className="pb-2 font-medium text-ink-500">Description</th>
+                <th className="pb-2 font-medium text-ink-500">Assets</th>
+                <th className="pb-2 font-medium text-ink-500"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
               {categories.map((cat: AssetCategory) => (
                 <tr key={cat.id}>
-                  <td className="py-2 font-medium text-slate-900 dark:text-white">{cat.name}</td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">{cat.description ?? '—'}</td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">{cat._count?.assets ?? 0}</td>
+                  <td className="py-2 font-medium text-ink-900 dark:text-white">{cat.name}</td>
+                  <td className="py-2 text-ink-600 dark:text-ink-400">{cat.description ?? '—'}</td>
+                  <td className="py-2 text-ink-600 dark:text-ink-400">{cat._count?.assets ?? 0}</td>
                   <td className="py-2 text-right">
                     <Button
                       variant="secondary"
