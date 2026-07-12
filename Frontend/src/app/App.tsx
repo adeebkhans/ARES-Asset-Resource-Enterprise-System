@@ -12,6 +12,7 @@ import { AssetsPage } from '@/features/assets/AssetsPage';
 import { MaintenancePage } from '@/features/maintenance/MaintenancePage';
 import { AuditPage } from '@/features/audits/AuditPage';
 import { NotificationsPage } from '@/features/notifications/NotificationsPage';
+import { ApprovalPage } from '@/features/approvals/ApprovalPage';
 
 export function App() {
   return (
@@ -29,6 +30,7 @@ export function App() {
               <Route path="/maintenance" element={<MaintenancePage />} />
               <Route path="/audits" element={<AuditPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
+              <Route path="/approvals" element={<ApprovalPage />} />
               {/* Organization Setup is Admin-only per the brief — Departments/Categories/Employee Directory. */}
               <Route element={<RequireRole roles={['ADMIN']} />}>
                 <Route path="/org-setup" element={<OrgSetupPage />} />

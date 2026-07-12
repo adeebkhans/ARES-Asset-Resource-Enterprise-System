@@ -109,22 +109,6 @@ export function MaintenancePage() {
     },
   });
 
-  const approveMutation = useMutation({
-    mutationFn: (id: string) => updateMaintenanceStatus(id, { status: 'APPROVED' }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['maintenance'] });
-      queryClient.invalidateQueries({ queryKey: ['maintenance-status-counts'] });
-    },
-  });
-
-  const rejectMutation = useMutation({
-    mutationFn: (id: string) => updateMaintenanceStatus(id, { status: 'REJECTED' }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['maintenance'] });
-      queryClient.invalidateQueries({ queryKey: ['maintenance-status-counts'] });
-    },
-  });
-
   const {
     register: registerCreate,
     handleSubmit: handleSubmitCreate,
@@ -229,20 +213,7 @@ export function MaintenancePage() {
                   <td className="py-2">
                     <div className="flex items-center gap-1">
                       {req.status === 'PENDING' && (
-                        <>
-                          <button
-                            className="text-xs text-green-600 hover:underline"
-                            onClick={() => approveMutation.mutate(req.id)}
-                          >
-                            Approve
-                          </button>
-                          <button
-                            className="text-xs text-red-600 hover:underline"
-                            onClick={() => rejectMutation.mutate(req.id)}
-                          >
-                            Reject
-                          </button>
-                        </>
+                        <span className="text-xs text-amber-600">Awaiting Approval</span>
                       )}
                       {req.status === 'APPROVED' && (
                         <button

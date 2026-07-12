@@ -8,7 +8,7 @@ export const createMaintenanceRequestSchema = z.object({
 });
 
 export const updateMaintenanceStatusSchema = z.object({
-  status: z.enum(['APPROVED', 'REJECTED', 'IN_PROGRESS', 'RESOLVED']),
+  status: z.enum(['IN_PROGRESS', 'RESOLVED']),
   technicianName: z.string().trim().max(100).optional(),
   resolutionNotes: z.string().trim().max(2000).optional(),
 });

@@ -15,7 +15,9 @@ import { activityLogRoutes, registerActivityLogListeners } from '@/modules/activ
 import { maintenanceRoutes } from '@/modules/maintenance';
 import { auditRoutes } from '@/modules/audits';
 import { notificationRoutes, registerNotificationListeners } from '@/modules/notifications';
+import { approvalRoutes, registerApprovalListeners } from '@/modules/approvals';
 import { sendSuccess } from '@/utils/response';
+import { startJobs } from '@/jobs';
 
 export function createApp(): Express {
   const app = express();
@@ -39,9 +41,12 @@ export function createApp(): Express {
   app.use('/api/v1/maintenance', maintenanceRoutes);
   app.use('/api/v1/audits', auditRoutes);
   app.use('/api/v1/notifications', notificationRoutes);
+  app.use('/api/v1/approvals', approvalRoutes);
 
   registerActivityLogListeners();
   registerNotificationListeners();
+  registerApprovalListeners();
+  startJobs();
 
   app.use(notFoundHandler);
   app.use(errorHandler);

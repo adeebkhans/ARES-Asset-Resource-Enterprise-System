@@ -41,6 +41,9 @@ model Organization {
   assets             Asset[]
   maintenanceRequests MaintenanceRequest[]
   auditCycles        AuditCycle[]
+  approvalRules      ApprovalRule[]
+  approvals          Approval[]
+  approvalDelegations ApprovalDelegation[]
 
   @@map("organizations")
 }
@@ -77,6 +80,11 @@ model User {
   auditAssignments   AuditAssignment[]
   auditRecords       AuditRecord[]      @relation("AuditRecordsAuditedBy")
   auditCyclesCreated AuditCycle[]       @relation("AuditCycleCreator")
+  approvalsRequested Approval[]         @relation("ApprovalRequestedBy")
+  approvalsCurrent   Approval[]         @relation("ApprovalCurrentApprover")
+  approvalsDecided   Approval[]         @relation("ApprovalDecidedBy")
+  delegationsGiven   ApprovalDelegation[] @relation("ApprovalDelegationDelegator")
+  delegationsReceived ApprovalDelegation[] @relation("ApprovalDelegationDelegate")
 
   @@unique([orgId, email])
   @@index([orgId])
@@ -383,4 +391,89 @@ model ActivityLog {
   @@index([orgId, userId])
   @@index([orgId, entityType, entityId])
   @@map("activity_logs")
+}
+
+// ---------------------------------------------------------------------------
+// 4.7 Generic Approval Engine (Phase 4)
+// ---------------------------------------------------------------------------
+
+enum ApprovalType {
+  MAINTENANCE
+  TRANSFER
+  AUDIT_DISCREPANCY
+  CUSTOM
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ESCALATED
+}
+
+model ApprovalRule {
+  id              String       @id @default(uuid())
+  orgId           String
+  approvalType    ApprovalType
+  slaHours        Int          @default(24)
+  escalateToRole  UserRole     @default(ADMIN)
+  createdBy       String
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, approvalType])
+  @@index([orgId])
+  @@map("approval_rules")
+}
+
+model Approval {
+  id                    String         @id @default(uuid())
+  orgId                 String
+  type                  ApprovalType
+  entityType            String
+  entityId              String
+  requestedById         String
+  currentApproverUserId String?
+  status                ApprovalStatus @default(PENDING)
+  dueAt                 DateTime
+  escalatedAt           DateTime?
+  decidedById           String?
+  decidedAt             DateTime?
+  comment               String?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  organization     Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  requestedBy      User             @relation("ApprovalRequestedBy", fields: [requestedById], references: [id], onDelete: Restrict)
+  currentApprover  User?            @relation("ApprovalCurrentApprover", fields: [currentApproverUserId], references: [id], onDelete: SetNull)
+  decidedBy        User?            @relation("ApprovalDecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@unique([entityType, entityId])
+  @@index([orgId])
+  @@index([orgId, status])
+  @@index([orgId, currentApproverUserId])
+  @@index([dueAt])
+  @@map("approvals")
+}
+
+model ApprovalDelegation {
+  id               String   @id @default(uuid())
+  orgId            String
+  delegatorUserId  String
+  delegateUserId   String
+  startDate        DateTime
+  endDate          DateTime
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  delegator     User         @relation("ApprovalDelegationDelegator", fields: [delegatorUserId], references: [id], onDelete: Cascade)
+  delegate      User         @relation("ApprovalDelegationDelegate", fields: [delegateUserId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([orgId, delegatorUserId])
+  @@index([orgId, delegateUserId])
+  @@map("approval_delegations")
 }

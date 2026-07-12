@@ -25,6 +25,7 @@ const NAV_LINKS: { to: string; label: string; adminOnly?: boolean }[] = [
   { to: '/assets', label: 'Assets' },
   { to: '/maintenance', label: 'Maintenance' },
   { to: '/audits', label: 'Audits' },
+  { to: '/approvals', label: 'Approvals' },
   { to: '/notifications', label: 'Notifications' },
 ];
 

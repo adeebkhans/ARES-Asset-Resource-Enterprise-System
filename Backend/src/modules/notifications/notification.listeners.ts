@@ -102,5 +102,8 @@ export function registerNotificationListeners(): void {
     }
   });
 
+  // Phase 4 — Approvals (handled by approval.listeners.ts to avoid duplicates)
+  // Approval notifications are created in approval.listeners.ts
+
   logger.info('Notification event listeners registered');
 }
