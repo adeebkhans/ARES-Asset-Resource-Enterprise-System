@@ -12,6 +12,9 @@ import { assetCategoryRoutes } from '@/modules/asset-categories';
 import { employeeRoutes } from '@/modules/employees';
 import { assetRoutes } from '@/modules/assets';
 import { activityLogRoutes, registerActivityLogListeners } from '@/modules/activity-logs';
+import { maintenanceRoutes } from '@/modules/maintenance';
+import { auditRoutes } from '@/modules/audits';
+import { notificationRoutes, registerNotificationListeners } from '@/modules/notifications';
 import { sendSuccess } from '@/utils/response';
 
 export function createApp(): Express {
@@ -33,8 +36,12 @@ export function createApp(): Express {
   app.use('/api/v1/employees', employeeRoutes);
   app.use('/api/v1/assets', assetRoutes);
   app.use('/api/v1/activity-logs', activityLogRoutes);
+  app.use('/api/v1/maintenance', maintenanceRoutes);
+  app.use('/api/v1/audits', auditRoutes);
+  app.use('/api/v1/notifications', notificationRoutes);
 
   registerActivityLogListeners();
+  registerNotificationListeners();
 
   app.use(notFoundHandler);
   app.use(errorHandler);
