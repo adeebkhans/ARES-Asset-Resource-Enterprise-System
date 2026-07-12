@@ -6,7 +6,8 @@ import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
 import { StatusBadge } from '@/components/ui/Badge';
 import { ApiRequestError } from '@/types/api.types';
-import { listEmployees, updateEmployeeRole } from '@/features/employees/api';
+import { listEmployees, updateEmployee, updateEmployeeRole } from '@/features/employees/api';
+import { listDepartments } from '@/features/departments/api';
 import { useAuthStore } from '@/store/auth.store';
 import type { Employee, Role } from '@/types/domain.types';
 
@@ -29,12 +30,21 @@ export function EmployeesTab() {
   const currentUserId = useAuthStore((s) => s.user?.id);
   const [search, setSearch] = useState('');
   const [promoteUser, setPromoteUser] = useState<Employee | null>(null);
+  const [editUser, setEditUser] = useState<Employee | null>(null);
   const [newRole, setNewRole] = useState<Role>('EMPLOYEE');
+  const [editName, setEditName] = useState('');
+  const [editDept, setEditDept] = useState('');
+  const [editStatus, setEditStatus] = useState('ACTIVE');
   const [error, setError] = useState('');
 
   const { data: employees = [], isLoading } = useQuery({
     queryKey: ['employees', search],
     queryFn: () => listEmployees(search || undefined),
+  });
+
+  const { data: departments = [] } = useQuery({
+    queryKey: ['departments'],
+    queryFn: listDepartments,
   });
 
   const promoteMutation = useMutation({
@@ -48,6 +58,21 @@ export function EmployeesTab() {
       setError(err instanceof ApiRequestError ? err.message : 'Failed to update role');
     },
   });
+
+  const editMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: { name?: string; departmentId?: string | null; status?: string } }) =>
+      updateEmployee(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      setEditUser(null);
+      setError('');
+    },
+    onError: (err) => {
+      setError(err instanceof ApiRequestError ? err.message : 'Failed to update employee');
+    },
+  });
+
+  const deptOptions = (departments as { id: string; name: string }[]).map((d) => ({ value: d.id, label: d.name }));
 
   return (
     <div className="flex flex-col gap-4">
@@ -92,16 +117,32 @@ export function EmployeesTab() {
                   <td className="py-2 text-ink-600 dark:text-ink-400">{emp.department?.name ?? '—'}</td>
                   <td className="py-2"><StatusBadge status={emp.status} /></td>
                   <td className="py-2 text-right">
-                    {emp.id === currentUserId ? (
-                      <span className="text-xs text-ink-400">You can't change your own role</span>
-                    ) : (
-                      <Button
-                        variant="secondary"
-                        onClick={() => { setPromoteUser(emp); setNewRole(emp.role); setError(''); }}
-                      >
-                        Change Role
-                      </Button>
-                    )}
+                    <div className="flex gap-1">
+                      {emp.id !== currentUserId && (
+                        <Button
+                          variant="secondary"
+                          onClick={() => {
+                            setEditUser(emp);
+                            setEditName(emp.name);
+                            setEditDept(emp.departmentId ?? '');
+                            setEditStatus(emp.status);
+                            setError('');
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      )}
+                      {emp.id === currentUserId ? (
+                        <span className="text-xs text-ink-400">You can't change your own role</span>
+                      ) : (
+                        <Button
+                          variant="secondary"
+                          onClick={() => { setPromoteUser(emp); setNewRole(emp.role); setError(''); }}
+                        >
+                          Change Role
+                        </Button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -127,6 +168,44 @@ export function EmployeesTab() {
           />
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" isLoading={promoteMutation.isPending}>Update Role</Button>
+        </form>
+      </Modal>
+
+      <Modal open={!!editUser} onClose={() => setEditUser(null)} title={`Edit Employee — ${editUser?.name}`}>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!editUser) return;
+            editMutation.mutate({
+              id: editUser.id,
+              payload: {
+                name: editName.trim() || undefined,
+                departmentId: editDept || null,
+                status: editStatus,
+              },
+            });
+          }}
+        >
+          <Input
+            label="Name"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+          />
+          <Select
+            label="Department"
+            options={[{ value: '', label: 'No department' }, ...deptOptions]}
+            value={editDept}
+            onChange={(e) => setEditDept(e.target.value)}
+          />
+          <Select
+            label="Status"
+            options={[{ value: 'ACTIVE', label: 'Active' }, { value: 'INACTIVE', label: 'Inactive' }]}
+            value={editStatus}
+            onChange={(e) => setEditStatus(e.target.value)}
+          />
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <Button type="submit" isLoading={editMutation.isPending}>Save Changes</Button>
         </form>
       </Modal>
     </div>

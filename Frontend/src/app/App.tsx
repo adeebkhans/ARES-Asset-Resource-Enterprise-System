@@ -15,6 +15,8 @@ import { NotificationsPage } from '@/features/notifications/NotificationsPage';
 import { ApprovalPage } from '@/features/approvals/ApprovalPage';
 import { CustomObjectsPage } from '@/features/custom-objects/CustomObjectsPage';
 import { CustomObjectDetailPage } from '@/features/custom-objects/CustomObjectDetailPage';
+import { ReportsPage } from '@/features/reports/ReportsPage';
+import { ActivityLogsPage } from '@/features/activity-logs/ActivityLogsPage';
 
 export function App() {
   return (
@@ -35,6 +37,8 @@ export function App() {
               <Route path="/approvals" element={<ApprovalPage />} />
               <Route path="/custom-objects" element={<CustomObjectsPage />} />
               <Route path="/custom-objects/:id" element={<CustomObjectDetailPage />} />
+              <Route path="/reports" element={<ReportsPage />} />
+              <Route path="/activity-logs" element={<ActivityLogsPage />} />
               {/* Organization Setup is Admin-only per the brief — Departments/Categories/Employee Directory. */}
               <Route element={<RequireRole roles={['ADMIN']} />}>
                 <Route path="/org-setup" element={<OrgSetupPage />} />

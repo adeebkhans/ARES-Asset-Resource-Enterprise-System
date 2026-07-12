@@ -18,6 +18,7 @@ import {
   submitAuditRecord,
   getAuditRecords,
   getAuditStatusCounts,
+  getMyAuditAssignments,
 } from '@/features/audits/api';
 import type { AuditCycle, AuditCycleStatus, AuditRecord } from '@/types/domain.types';
 
@@ -54,6 +55,7 @@ type SubmitRecordForm = z.infer<typeof submitRecordSchema>;
 
 export function AuditPage() {
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<'all' | 'my-assignments'>('all');
   const [showCreate, setShowCreate] = useState(false);
   const [showRecords, setShowRecords] = useState<string | null>(null);
   const [showSubmitRecord, setShowSubmitRecord] = useState<string | null>(null);
@@ -68,6 +70,13 @@ export function AuditPage() {
         status: (statusFilter as AuditCycleStatus) || undefined,
         search: search || undefined,
       }),
+    enabled: activeTab === 'all',
+  });
+
+  const { data: myAssignments = [], isLoading: loadingAssignments } = useQuery({
+    queryKey: ['audits-my-assignments'],
+    queryFn: getMyAuditAssignments,
+    enabled: activeTab === 'my-assignments',
   });
 
   const { data: statusCounts } = useQuery({
@@ -152,6 +161,9 @@ export function AuditPage() {
     if (showSubmitRecord) submitRecordMutation.mutate({ cycleId: showSubmitRecord, data });
   };
 
+  const displayCycles = activeTab === 'my-assignments' ? myAssignments : cycles;
+  const isTabLoading = activeTab === 'my-assignments' ? loadingAssignments : isLoading;
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between">
@@ -162,7 +174,7 @@ export function AuditPage() {
         <Button onClick={() => { setShowCreate(true); setError(''); resetCreate(); }}>+ Create Cycle</Button>
       </div>
 
-      {statusCounts && (
+      {statusCounts && activeTab === 'all' && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3">
           {Object.entries(statusCounts as Record<string, number>).map(([status, count]) => (
             <Card key={status} className="flex flex-col items-center gap-1 py-3">
@@ -173,30 +185,47 @@ export function AuditPage() {
         </div>
       )}
 
-      <div className="flex flex-wrap items-end gap-3">
-        <Input
-          label=""
-          placeholder="Search cycles…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-64"
-        />
-        <Select
-          label=""
-          options={STATUS_OPTIONS}
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as AuditCycleStatus | '')}
-          className="w-48"
-        />
+      <div className="flex items-center gap-2 border-b border-ink-200 dark:border-ink-700">
+        <button
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'all'
+              ? 'border-brand-600 text-brand-800 dark:border-brand-500 dark:text-brand-300'
+              : 'border-transparent text-ink-500 hover:text-ink-700'
+          }`}
+          onClick={() => setActiveTab('all')}
+        >
+          All Cycles
+        </button>
+        <button
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'my-assignments'
+              ? 'border-brand-600 text-brand-800 dark:border-brand-500 dark:text-brand-300'
+              : 'border-transparent text-ink-500 hover:text-ink-700'
+          }`}
+          onClick={() => setActiveTab('my-assignments')}
+        >
+          My Assignments
+        </button>
       </div>
 
-      {isLoading && <p className="text-sm text-ink-500">Loading…</p>}
-
-      {!isLoading && cycles.length === 0 && (
-        <EmptyState icon="🔍" title="No audit cycles" description="Create a cycle to start verifying assets against their expected state." />
+      {activeTab === 'all' && (
+        <div className="flex flex-wrap items-end gap-3">
+          <Input label="" placeholder="Search cycles…" value={search} onChange={(e) => setSearch(e.target.value)} className="w-64" />
+          <Select label="" options={STATUS_OPTIONS} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as AuditCycleStatus | '')} className="w-48" />
+        </div>
       )}
 
-      {cycles.length > 0 && (
+      {isTabLoading && <p className="text-sm text-ink-500">Loading…</p>}
+
+      {!isTabLoading && displayCycles.length === 0 && (
+        <EmptyState
+          icon="🔍"
+          title={activeTab === 'my-assignments' ? 'No assignments' : 'No audit cycles'}
+          description={activeTab === 'my-assignments' ? "You haven't been assigned to any audit cycles yet." : "Create a cycle to start verifying assets against their expected state."}
+        />
+      )}
+
+      {displayCycles.length > 0 && (
         <Card className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -212,7 +241,7 @@ export function AuditPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
-                {cycles.map((cycle: AuditCycle) => (
+                {displayCycles.map((cycle: AuditCycle) => (
                   <tr key={cycle.id} className="transition-colors hover:bg-ink-50/70 dark:hover:bg-ink-800/40">
                     <td className="px-5 py-2.5 text-ink-600 dark:text-ink-400">
                       {cycle.scopeDepartment?.name ?? 'All'}

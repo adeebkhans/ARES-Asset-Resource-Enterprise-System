@@ -36,12 +36,20 @@ export function deleteObjectDefinition(id: string) {
   return apiRequest<{ deleted: boolean }>(`/custom-objects/${id}`, { method: 'DELETE' });
 }
 
+export function updateObjectDefinition(id: string, payload: { label?: string; pluralLabel?: string; icon?: string; description?: string }) {
+  return apiRequest<CustomObjectDefinition>(`/custom-objects/${id}`, { method: 'PATCH', body: payload });
+}
+
 export function listFieldsForObject(objectId: string) {
   return apiRequest<CustomFieldDefinition[]>(`/custom-objects/${objectId}/fields`);
 }
 
 export function createFieldForObject(objectId: string, payload: CreateFieldPayload) {
   return apiRequest<CustomFieldDefinition>(`/custom-objects/${objectId}/fields`, { method: 'POST', body: payload });
+}
+
+export function updateField(fieldId: string, payload: { label?: string; options?: string[]; isRequired?: boolean; sortOrder?: number }) {
+  return apiRequest<CustomFieldDefinition>(`/custom-objects/fields/${fieldId}`, { method: 'PATCH', body: payload });
 }
 
 export function deleteField(fieldId: string) {
@@ -62,6 +70,10 @@ export function updateRecord(recordId: string, data: Record<string, unknown>) {
 
 export function deleteRecord(recordId: string) {
   return apiRequest<{ deleted: boolean }>(`/custom-objects/records/${recordId}`, { method: 'DELETE' });
+}
+
+export function getRecord(recordId: string) {
+  return apiRequest<CustomObjectRecord>(`/custom-objects/records/${recordId}`);
 }
 
 // Layer 1 — category custom fields, exposed under /asset-categories.
