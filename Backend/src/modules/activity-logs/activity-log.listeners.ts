@@ -13,7 +13,7 @@ export function registerActivityLogListeners(): void {
   eventBus.on('asset.registered', async (payload) => {
     await service.log({
       orgId: payload.orgId,
-      userId: 'system',
+      userId: payload.registeredBy,
       action: 'asset.registered',
       entityType: 'Asset',
       entityId: payload.assetId,

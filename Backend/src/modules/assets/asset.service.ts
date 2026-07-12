@@ -1,5 +1,5 @@
 import QRCode from 'qrcode';
-import { AssetStatus, AssetStatusChangeSource } from '@prisma/client';
+import { Asset, AssetStatus, AssetStatusChangeSource, Prisma } from '@prisma/client';
 import { prisma } from '@/core/database/prisma';
 import { ApiError } from '@/core/errors/ApiError';
 import { ASSET_TRANSITIONS } from '@/constants/asset-states';
@@ -16,6 +16,13 @@ import {
 
 function generateAssetTag(sequence: number): string {
   return `AF-${String(sequence).padStart(4, '0')}`;
+}
+
+const MAX_ASSET_TAG_RETRIES = 20;
+
+/** Prisma's unique-constraint violation code, used to detect a concurrent asset-tag collision. */
+function isUniqueConstraintViolation(err: unknown): boolean {
+  return err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002';
 }
 
 export class AssetService {
@@ -41,34 +48,19 @@ export class AssetService {
     });
     if (!cat) throw ApiError.badRequest('Asset category not found');
 
-    const assetTag = await this.generateUniqueAssetTag(orgId);
+    const asset = await this.createWithUniqueTag(orgId, input);
 
     let qrCodeUrl: string | null = null;
     try {
-      const qrData = JSON.stringify({ orgId, assetTag });
+      const qrData = JSON.stringify({ orgId, assetTag: asset.assetTag });
       qrCodeUrl = await QRCode.toDataURL(qrData, { width: 300, margin: 2 });
+      await this.repo.update(orgId, asset.id, { qrCodeUrl });
     } catch {
-      // QR generation failure is non-fatal
+      // QR generation/persist failure is non-fatal — the asset still registers, just without a QR code yet.
     }
 
-    const asset = await this.repo.create({
-      orgId,
-      assetTag,
-      name: input.name,
-      categoryId: input.categoryId,
-      serialNumber: input.serialNumber ?? null,
-      acquisitionDate: input.acquisitionDate ? new Date(input.acquisitionDate) : null,
-      acquisitionCost: input.acquisitionCost ?? null,
-      condition: input.condition ?? null,
-      location: input.location ?? null,
-      isShared: input.isShared ?? false,
-      customFieldValues: input.customFieldValues ?? {},
-      qrCodeUrl,
-      status: 'AVAILABLE',
-    });
-
     await this.repo.writeStatusHistory({
-      assetId: (asset as any).id,
+      assetId: asset.id,
       fromStatus: null,
       toStatus: 'AVAILABLE',
       changedBy: userId,
@@ -77,12 +69,53 @@ export class AssetService {
     });
 
     eventBus.emit('asset.registered', {
-      assetId: (asset as any).id,
+      assetId: asset.id,
       orgId,
       categoryId: input.categoryId,
+      registeredBy: userId,
     });
 
-    return this.getById(orgId, (asset as any).id);
+    return this.getById(orgId, asset.id);
+  }
+
+  /**
+   * Two concurrent registrations can both read the same "next" tag before
+   * either writes. Rather than lock, retry on a unique-constraint conflict —
+   * but re-reading MAX on every retry would just make every racing request
+   * converge on the same contested number again. Instead, read MAX once and
+   * then probe forward locally (seq, seq+1, seq+2, ...) so each retry within
+   * a request always targets a number none of its own attempts has tried yet.
+   */
+  private async createWithUniqueTag(orgId: string, input: CreateAssetInput): Promise<Asset> {
+    let sequence = (await this.repo.findMaxAssetTagSequence(orgId)) + 1;
+
+    for (let attempt = 0; attempt < MAX_ASSET_TAG_RETRIES; attempt++) {
+      const assetTag = generateAssetTag(sequence);
+      try {
+        return await this.repo.create({
+          orgId,
+          assetTag,
+          name: input.name,
+          categoryId: input.categoryId,
+          serialNumber: input.serialNumber ?? null,
+          acquisitionDate: input.acquisitionDate ? new Date(input.acquisitionDate) : null,
+          acquisitionCost: input.acquisitionCost ?? null,
+          condition: input.condition ?? null,
+          location: input.location ?? null,
+          isShared: input.isShared ?? false,
+          customFieldValues: input.customFieldValues ?? {},
+          qrCodeUrl: null,
+          status: 'AVAILABLE',
+        });
+      } catch (err) {
+        if (isUniqueConstraintViolation(err) && attempt < MAX_ASSET_TAG_RETRIES - 1) {
+          sequence += 1;
+          continue;
+        }
+        throw err;
+      }
+    }
+    throw ApiError.internal('Could not generate a unique asset tag — please retry');
   }
 
   async update(orgId: string, id: string, input: UpdateAssetInput) {
@@ -146,15 +179,5 @@ export class AssetService {
 
   async getStatusCounts(orgId: string) {
     return this.repo.countByStatus(orgId);
-  }
-
-  private async generateUniqueAssetTag(orgId: string): Promise<string> {
-    const latest = await this.repo.findLatestAssetTag(orgId);
-    let sequence = 1;
-    if (latest) {
-      const match = latest.match(/AF-(\d+)/);
-      if (match) sequence = parseInt(match[1], 10) + 1;
-    }
-    return generateAssetTag(sequence);
   }
 }

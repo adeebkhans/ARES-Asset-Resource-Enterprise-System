@@ -1,14 +1,16 @@
 import { Request, Response } from 'express';
 import { asyncHandler } from '@/core/base/asyncHandler';
-import { sendSuccess } from '@/utils/response';
+import { sendPaginated, sendSuccess } from '@/utils/response';
+import { paginationQuerySchema } from '@/utils/pagination';
 import { AssetCategoryService } from './asset-category.service';
 
 export class AssetCategoryController {
   constructor(private readonly service: AssetCategoryService = new AssetCategoryService()) {}
 
   list = asyncHandler(async (req: Request, res: Response) => {
-    const result = await this.service.list(req.auth!.orgId, req.query as any);
-    sendSuccess(res, result.items, 200);
+    const params = paginationQuerySchema.parse(req.query);
+    const result = await this.service.list(req.auth!.orgId, params);
+    sendPaginated(res, result);
   });
 
   getById = asyncHandler(async (req: Request, res: Response) => {

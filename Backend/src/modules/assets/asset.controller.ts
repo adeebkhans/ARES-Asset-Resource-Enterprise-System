@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { asyncHandler } from '@/core/base/asyncHandler';
-import { sendSuccess } from '@/utils/response';
-import { AssetService } from './asset.service';
+import { sendPaginated, sendSuccess } from '@/utils/response';
 import { paginationQuerySchema } from '@/utils/pagination';
+import { AssetService } from './asset.service';
 import { assetSearchSchema } from './asset.validators';
 
 export class AssetController {
@@ -11,13 +11,13 @@ export class AssetController {
   list = asyncHandler(async (req: Request, res: Response) => {
     const params = paginationQuerySchema.parse(req.query);
     const result = await this.service.list(req.auth!.orgId, params);
-    sendSuccess(res, result.items, 200);
+    sendPaginated(res, result);
   });
 
   search = asyncHandler(async (req: Request, res: Response) => {
     const params = assetSearchSchema.parse(req.query);
     const result = await this.service.search(req.auth!.orgId, params);
-    sendSuccess(res, result.items, 200);
+    sendPaginated(res, result);
   });
 
   getById = asyncHandler(async (req: Request, res: Response) => {

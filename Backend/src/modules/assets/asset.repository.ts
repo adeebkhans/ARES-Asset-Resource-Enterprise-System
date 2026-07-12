@@ -18,13 +18,20 @@ export class AssetRepository extends BaseRepository<Asset> {
     return prisma.asset.findFirst({ where: { orgId, assetTag } });
   }
 
-  async findLatestAssetTag(orgId: string): Promise<string | null> {
-    const latest = await prisma.asset.findFirst({
-      where: { orgId },
-      orderBy: { createdAt: 'desc' },
-      select: { assetTag: true },
-    });
-    return latest?.assetTag ?? null;
+  /**
+   * Highest existing `AF-####` sequence number for the org. Deliberately reads
+   * the numeric MAX rather than "most recently created" — creation order and
+   * tag order can diverge (retries, clock skew), and the caller also retries
+   * on a unique-constraint conflict, so this only needs to be a good starting
+   * guess, not a synchronized counter.
+   */
+  async findMaxAssetTagSequence(orgId: string): Promise<number> {
+    const rows = await prisma.$queryRaw<{ max: number | null }[]>`
+      SELECT MAX(CAST(SUBSTRING("assetTag" FROM 'AF-(\d+)') AS INTEGER)) as max
+      FROM assets
+      WHERE "orgId" = ${orgId} AND "assetTag" ~ '^AF-\d+$'
+    `;
+    return rows[0]?.max ?? 0;
   }
 
   async findByIdWithCategory(orgId: string, id: string) {

@@ -1,6 +1,10 @@
 import { AssetCategory } from '@prisma/client';
 import { prisma } from '@/core/database/prisma';
 import { BaseRepository } from '@/core/base/BaseRepository';
+import { PaginatedResult, PaginationParams } from '@/types/common.types';
+import { buildPaginatedResult, toSkipTake } from '@/utils/pagination';
+
+export type AssetCategoryWithCount = AssetCategory & { _count: { assets: number } };
 
 export class AssetCategoryRepository extends BaseRepository<AssetCategory> {
   constructor() {
@@ -18,8 +22,11 @@ export class AssetCategoryRepository extends BaseRepository<AssetCategory> {
     });
   }
 
-  async listWithCounts(orgId: string, params: { page: number; pageSize: number }) {
-    const { skip, take } = { skip: (params.page - 1) * params.pageSize, take: params.pageSize };
+  async listWithCounts(
+    orgId: string,
+    params: PaginationParams,
+  ): Promise<PaginatedResult<AssetCategoryWithCount>> {
+    const { skip, take } = toSkipTake(params);
     const where = { orgId };
     const [items, total] = await Promise.all([
       prisma.assetCategory.findMany({
@@ -31,6 +38,6 @@ export class AssetCategoryRepository extends BaseRepository<AssetCategory> {
       }),
       prisma.assetCategory.count({ where }),
     ]);
-    return { items, total, page: params.page, pageSize: params.pageSize, totalPages: Math.max(1, Math.ceil(total / params.pageSize)) };
+    return buildPaginatedResult(items, total, params);
   }
 }

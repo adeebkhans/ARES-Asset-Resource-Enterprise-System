@@ -19,7 +19,7 @@ export interface DomainEventMap {
     source: AssetStatusChangeSource;
     reason?: string;
   };
-  'asset.registered': { assetId: string; orgId: string; categoryId: string };
+  'asset.registered': { assetId: string; orgId: string; categoryId: string; registeredBy: string };
 }
 
 export type DomainEventName = keyof DomainEventMap;

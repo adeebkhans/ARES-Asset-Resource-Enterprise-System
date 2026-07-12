@@ -7,6 +7,7 @@ import { Modal } from '@/components/ui/Modal';
 import { StatusBadge } from '@/components/ui/Badge';
 import { ApiRequestError } from '@/types/api.types';
 import { listEmployees, updateEmployeeRole } from '@/features/employees/api';
+import { useAuthStore } from '@/store/auth.store';
 import type { Employee, Role } from '@/types/domain.types';
 
 const ROLE_OPTIONS = [
@@ -25,6 +26,7 @@ const ROLE_LABEL: Record<Role, string> = {
 
 export function EmployeesTab() {
   const queryClient = useQueryClient();
+  const currentUserId = useAuthStore((s) => s.user?.id);
   const [search, setSearch] = useState('');
   const [promoteUser, setPromoteUser] = useState<Employee | null>(null);
   const [newRole, setNewRole] = useState<Role>('EMPLOYEE');
@@ -90,12 +92,16 @@ export function EmployeesTab() {
                   <td className="py-2 text-slate-600 dark:text-slate-400">{emp.department?.name ?? '—'}</td>
                   <td className="py-2"><StatusBadge status={emp.status} /></td>
                   <td className="py-2 text-right">
-                    <Button
-                      variant="secondary"
-                      onClick={() => { setPromoteUser(emp); setNewRole(emp.role); setError(''); }}
-                    >
-                      Change Role
-                    </Button>
+                    {emp.id === currentUserId ? (
+                      <span className="text-xs text-slate-400">You can't change your own role</span>
+                    ) : (
+                      <Button
+                        variant="secondary"
+                        onClick={() => { setPromoteUser(emp); setNewRole(emp.role); setError(''); }}
+                      >
+                        Change Role
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ))}

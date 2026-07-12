@@ -19,15 +19,16 @@ const ROLE_BADGE_CLASS: Record<Role, string> = {
   EMPLOYEE: 'bg-role-employee/10 text-role-employee',
 };
 
-const NAV_LINKS = [
+const NAV_LINKS: { to: string; label: string; adminOnly?: boolean }[] = [
   { to: '/dashboard', label: 'Dashboard' },
-  { to: '/org-setup', label: 'Org Setup' },
+  { to: '/org-setup', label: 'Org Setup', adminOnly: true },
   { to: '/assets', label: 'Assets' },
 ];
 
 export function AppShell() {
   const navigate = useNavigate();
   const { user, refreshToken, clear } = useAuthStore();
+  const visibleLinks = NAV_LINKS.filter((link) => !link.adminOnly || user?.role === 'ADMIN');
 
   const handleLogout = async () => {
     if (refreshToken) {
@@ -43,7 +44,7 @@ export function AppShell() {
         <div className="flex items-center gap-6">
           <span className="text-lg font-semibold text-slate-900 dark:text-white">ARES</span>
           <nav className="flex items-center gap-1">
-            {NAV_LINKS.map((link) => (
+            {visibleLinks.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}

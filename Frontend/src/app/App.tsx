@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { QueryProvider } from './providers/QueryProvider';
 import { AppShell } from './AppShell';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { RequireRole } from '@/components/RequireRole';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { SignupPage } from '@/features/auth/SignupPage';
 import { RegisterOrganizationPage } from '@/features/auth/RegisterOrganizationPage';
@@ -21,8 +22,11 @@ export function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<AppShell />}>
               <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/org-setup" element={<OrgSetupPage />} />
               <Route path="/assets" element={<AssetsPage />} />
+              {/* Organization Setup is Admin-only per the brief — Departments/Categories/Employee Directory. */}
+              <Route element={<RequireRole roles={['ADMIN']} />}>
+                <Route path="/org-setup" element={<OrgSetupPage />} />
+              </Route>
             </Route>
           </Route>
 
