@@ -205,3 +205,23 @@ model AssetStatusHistory {
   @@index([assetId])
   @@map("asset_status_history")
 }
+
+// ---------------------------------------------------------------------------
+// 4.8 Activity Logs
+// ---------------------------------------------------------------------------
+
+model ActivityLog {
+  id           String   @id @default(uuid())
+  orgId        String
+  userId       String
+  action       String
+  entityType   String
+  entityId     String
+  metadata     Json     @default("{}")
+  timestamp    DateTime @default(now())
+
+  @@index([orgId])
+  @@index([orgId, userId])
+  @@index([orgId, entityType, entityId])
+  @@map("activity_logs")
+}
