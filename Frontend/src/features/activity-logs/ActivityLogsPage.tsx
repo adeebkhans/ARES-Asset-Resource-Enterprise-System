@@ -69,7 +69,7 @@ export function ActivityLogsPage() {
 
       {!isLoading && logs.length === 0 && (
         <EmptyState
-          icon="📋"
+          icon="clock-counter-clockwise"
           title="No activity logs"
           description={entityType || entityId ? 'Try clearing your filters.' : 'Actions will appear here as users interact with the system.'}
         />

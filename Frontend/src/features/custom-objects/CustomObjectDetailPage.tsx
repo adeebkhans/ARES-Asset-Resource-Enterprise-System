@@ -137,7 +137,7 @@ export function CustomObjectDetailPage() {
           ← Custom Objects
         </Link>
         <div className="mt-1 flex items-center gap-2">
-          <span className="text-2xl">{definition?.icon || '🧩'}</span>
+           <span className="text-2xl">{definition?.icon || <i className="ph-bold ph-puzzle-piece" />}</span>
           <h1 className="font-display text-2xl font-semibold text-ink-900 dark:text-white">{definition?.pluralLabel ?? '…'}</h1>
         </div>
         {definition?.description && <p className="text-sm text-ink-500">{definition.description}</p>}
@@ -193,12 +193,12 @@ export function CustomObjectDetailPage() {
         {recordsLoading && <p className="text-sm text-ink-500">Loading…</p>}
 
         {!recordsLoading && fields.length === 0 && (
-          <EmptyState icon="🏗️" title="Define fields first" description="Add at least one field above before creating records." />
+          <EmptyState icon="hard-hat" title="Define fields first" description="Add at least one field above before creating records." />
         )}
 
         {!recordsLoading && fields.length > 0 && records.length === 0 && (
           <EmptyState
-            icon="📋"
+            icon="clock-counter-clockwise"
             title={`No ${definition?.pluralLabel.toLowerCase() ?? 'records'} yet`}
             description="Records you add will show up here, in a table generated straight from the fields you defined."
             action={<Button onClick={() => setShowAddRecord(true)}>Add the first one</Button>}

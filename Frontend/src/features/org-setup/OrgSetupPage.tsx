@@ -9,10 +9,10 @@ import { TemplatesTab } from './tabs/TemplatesTab';
 type Tab = 'departments' | 'categories' | 'employees' | 'templates';
 
 const TABS: { key: Tab; label: string; icon: string }[] = [
-  { key: 'departments', label: 'Departments', icon: '🏢' },
-  { key: 'categories', label: 'Asset Categories', icon: '🏷️' },
-  { key: 'employees', label: 'Employee Directory', icon: '👥' },
-  { key: 'templates', label: 'Industry Templates', icon: '✨' },
+  { key: 'departments', label: 'Departments', icon: 'buildings' },
+  { key: 'categories', label: 'Asset Categories', icon: 'tag' },
+  { key: 'employees', label: 'Employee Directory', icon: 'users' },
+  { key: 'templates', label: 'Industry Templates', icon: 'puzzle-piece' },
 ];
 
 export function OrgSetupPage() {
@@ -37,7 +37,7 @@ export function OrgSetupPage() {
                 : 'border-transparent text-ink-500 hover:text-ink-800 dark:hover:text-ink-200',
             )}
           >
-            <span>{tab.icon}</span>
+            <i className={`ph-bold ph-${tab.icon}`} />
             {tab.label}
           </button>
         ))}

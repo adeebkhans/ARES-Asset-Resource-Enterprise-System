@@ -68,7 +68,7 @@ export function CustomObjectsPage() {
 
       {!isLoading && objects.length === 0 && (
         <EmptyState
-          icon="🧩"
+          icon="puzzle-piece"
           title="No custom objects yet"
           description="Model something your organization tracks that isn't an Asset — a Patient, a Guest, a Classroom — and it gets a form and a list for free."
           action={<Button onClick={() => setShowCreate(true)}>Create your first object type</Button>}
@@ -81,7 +81,7 @@ export function CustomObjectsPage() {
             <Link key={obj.id} to={`/custom-objects/${obj.id}`}>
               <Card className="flex h-full flex-col gap-2 transition-shadow hover:shadow-md">
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl">{obj.icon || '🧩'}</span>
+                   <span className="text-2xl">{obj.icon || <i className="ph-bold ph-puzzle-piece" />}</span>
                   <span className="font-display font-semibold text-ink-900 dark:text-white">{obj.pluralLabel}</span>
                 </div>
                 {obj.description && <p className="text-sm text-ink-500">{obj.description}</p>}
@@ -99,7 +99,7 @@ export function CustomObjectsPage() {
           <Input label="Machine key" placeholder="e.g. patient" error={formErrors.key?.message} {...register('key')} />
           <Input label="Label (singular)" placeholder="e.g. Patient" error={formErrors.label?.message} {...register('label')} />
           <Input label="Label (plural)" placeholder="e.g. Patients" error={formErrors.pluralLabel?.message} {...register('pluralLabel')} />
-          <Input label="Icon (optional emoji)" placeholder="🩺" {...register('icon')} />
+           <Input label="Icon (optional)" placeholder="e.g. stethoscope" {...register('icon')} />
           <Input label="Description (optional)" {...register('description')} />
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" isLoading={createMutation.isPending}>Create</Button>

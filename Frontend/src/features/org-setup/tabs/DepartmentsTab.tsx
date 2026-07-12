@@ -63,7 +63,7 @@ export function DepartmentsTab() {
       {isLoading && <p className="text-sm text-ink-500">Loading...</p>}
 
       {!isLoading && departments.length === 0 && (
-        <EmptyState icon="🏢" title="No departments yet" description="Create your first department to start organizing employees." action={<Button onClick={() => setShowCreate(true)}>Add Department</Button>} />
+        <EmptyState icon="buildings" title="No departments yet" description="Create your first department to start organizing employees." action={<Button onClick={() => setShowCreate(true)}>Add Department</Button>} />
       )}
 
       {departments.length > 0 && (

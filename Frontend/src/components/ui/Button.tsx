@@ -10,22 +10,24 @@ export function Button({ variant = 'primary', isLoading, className, children, di
   return (
     <button
       className={clsx(
-        'inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-60',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-ink-950',
-        variant === 'primary' &&
-          'bg-brand-700 text-white shadow-sm shadow-brand-900/10 hover:bg-brand-600 active:bg-brand-800 dark:bg-brand-600 dark:hover:bg-brand-500',
-        variant === 'secondary' &&
-          'border border-ink-200 bg-white text-ink-700 hover:border-ink-300 hover:bg-ink-50 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-200 dark:hover:bg-ink-800',
-        variant === 'ghost' &&
-          'text-ink-600 hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800',
-        variant === 'danger' &&
-          'bg-red-600 text-white shadow-sm hover:bg-red-500 active:bg-red-700',
+        'inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-60',
+        variant === 'primary' && 'btn-physical bg-chassis text-ink',
+        variant === 'secondary' && 'btn-physical bg-chassis text-label',
+        variant === 'ghost' && 'text-label hover:bg-recessed hover:text-ink rounded-lg px-3 py-1.5',
+        variant === 'danger' && 'btn-accent bg-accent text-accent-fg',
         className,
       )}
       disabled={disabled || isLoading}
       {...rest}
     >
-      {isLoading ? 'Please wait…' : children}
+      {isLoading ? (
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          Processing
+        </span>
+      ) : (
+        children
+      )}
     </button>
   );
 }

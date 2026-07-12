@@ -268,7 +268,7 @@ export function ApprovalPage() {
       {/* ── Approvals Table ──────────────────────────────────────────── */}
       {(activeTab === 'pending' || activeTab === 'all') && !isLoading && approvals.length === 0 && (
         <EmptyState
-          icon="✅"
+          icon="check-circle"
           title={activeTab === 'pending' ? 'Nothing waiting on you' : 'No approvals found'}
           description={activeTab === 'pending' ? "You're all caught up." : 'Approval requests from other modules will show up here.'}
         />
@@ -344,7 +344,7 @@ export function ApprovalPage() {
             <Button onClick={() => { setShowDelegation(true); setError(''); resetDelegation(); }}>+ New Delegation</Button>
           </div>
           {delegations.length === 0 ? (
-            <EmptyState icon="🔄" title="No delegations" description="Set up a delegation to let someone else handle your approvals while you're away." />
+            <EmptyState icon="arrows-clockwise" title="No delegations" description="Set up a delegation to let someone else handle your approvals while you're away." />
           ) : (
             <Card className="p-0">
               <div className="overflow-x-auto">

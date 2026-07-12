@@ -177,7 +177,7 @@ export function MaintenancePage() {
       {isLoading && <p className="text-sm text-ink-500">Loading…</p>}
 
       {!isLoading && requests.length === 0 && (
-        <EmptyState icon="🔧" title="No maintenance requests" description="Requests raised against your assets will show up here." />
+        <EmptyState icon="wrench" title="No maintenance requests" description="Requests raised against your assets will show up here." />
       )}
 
       {requests.length > 0 && (

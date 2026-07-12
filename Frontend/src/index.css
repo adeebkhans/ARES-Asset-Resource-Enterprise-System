@@ -1,69 +1,193 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: 'Manrope', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Fraunces', Georgia, serif;
+  --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  /* Brand — deep teal. Deliberately not indigo/violet: distinct from the
-     default "AI product" palette, reads as operational/trustworthy. */
-  --color-brand-50: #f0fdfa;
-  --color-brand-100: #ccfbf1;
-  --color-brand-200: #99f6e4;
-  --color-brand-300: #5eead4;
-  --color-brand-400: #2dd4bf;
-  --color-brand-500: #14b8a6;
-  --color-brand-600: #0d9488;
-  --color-brand-700: #0f766e;
-  --color-brand-800: #115e59;
-  --color-brand-900: #134e4a;
+  /* Industrial palette — neumorphic chassis system */
+  --color-chassis: #e0e5ec;
+  --color-panel: #f0f2f5;
+  --color-recessed: #d1d9e6;
+  --color-ink: #2d3436;
+  --color-label: #4a5568;
+  --color-accent: #ff4757;
+  --color-accent-fg: #ffffff;
 
-  /* Ink — warm neutral (stone-based) instead of cool slate/gray, paired with
-     the amber/warm accents used across role badges and status colors. */
-  --color-ink-50: #fafaf9;
-  --color-ink-100: #f5f5f4;
-  --color-ink-200: #e7e5e4;
-  --color-ink-300: #d6d3d1;
-  --color-ink-400: #a8a29e;
-  --color-ink-500: #78716c;
-  --color-ink-600: #57534e;
-  --color-ink-700: #44403c;
-  --color-ink-800: #292524;
-  --color-ink-900: #1c1917;
-  --color-ink-950: #0c0a09;
+  /* Semantic aliases mapped to chassis */
+  --color-brand-50: #f0f2f5;
+  --color-brand-100: #e0e5ec;
+  --color-brand-200: #d1d9e6;
+  --color-brand-300: #babecc;
+  --color-brand-400: #8e99a4;
+  --color-brand-500: #6b7a8d;
+  --color-brand-600: #4a5568;
+  --color-brand-700: #2d3436;
+  --color-brand-800: #1e2326;
+  --color-brand-900: #0a0a0a;
 
-  --color-role-admin: #7c3aed;
-  --color-role-asset-manager: #0891b2;
-  --color-role-department-head: #d97706;
-  --color-role-employee: #16a34a;
+  --color-ink-50: #f0f2f5;
+  --color-ink-100: #e0e5ec;
+  --color-ink-200: #d1d9e6;
+  --color-ink-300: #babecc;
+  --color-ink-400: #8e99a4;
+  --color-ink-500: #6b7a8d;
+  --color-ink-600: #4a5568;
+  --color-ink-700: #2d3436;
+  --color-ink-800: #1e2326;
+  --color-ink-900: #0a0a0a;
+  --color-ink-950: #050505;
+
+  --color-role-admin: #ff4757;
+  --color-role-asset-manager: #1e90ff;
+  --color-role-department-head: #ffa502;
+  --color-role-employee: #2ed573;
 }
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
+  --shadow-light: #ffffff;
+  --shadow-dark: #babecc;
+  --shadow-card: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+  --shadow-floating: 12px 12px 24px var(--shadow-dark), -12px -12px 24px var(--shadow-light), inset 1px 1px 0 rgba(255,255,255,0.5);
+  --shadow-pressed: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+  --shadow-recessed: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+  --shadow-sharp: 4px 4px 8px rgba(0,0,0,0.15), -1px -1px 1px rgba(255,255,255,0.8);
 }
 
 body {
   margin: 0;
   font-family: var(--font-sans);
-  @apply bg-ink-50 text-ink-900 dark:bg-ink-950 dark:text-ink-100;
+  background-color: var(--color-chassis);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Noise texture overlay for matte plastic feel */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.18;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Ambient top-left lighting */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 500px;
+  background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.35) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 #root {
   min-height: 100svh;
 }
 
-h1,
-h2,
-h3,
-.font-display {
-  font-family: var(--font-display);
-}
-
 ::selection {
-  @apply bg-brand-200 text-brand-900;
+  background: var(--color-recessed);
+  color: var(--color-ink);
 }
 
-/* Thin, unobtrusive scrollbars that still work everywhere (not just WebKit). */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-ink-300) transparent;
+}
+
+/* Neumorphic utility classes */
+.btn-physical {
+  box-shadow: var(--shadow-floating);
+  transition: all 150ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.btn-physical:active {
+  box-shadow: var(--shadow-pressed);
+  transform: translateY(2px);
+}
+
+.btn-accent {
+  box-shadow: 4px 4px 8px rgba(166,50,60,0.4), -4px -4px 8px rgba(255,100,110,0.4), inset 1px 1px 0 rgba(255,255,255,0.3);
+  border: 1px solid rgba(255,255,255,0.2);
+  transition: all 150ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.btn-accent:active {
+  box-shadow: inset 4px 4px 8px rgba(166,50,60,0.6), inset -4px -4px 8px rgba(255,100,110,0.6);
+  transform: translateY(2px);
+  border-color: transparent;
+}
+
+.card-bolted {
+  box-shadow: var(--shadow-card);
+  transition: all 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.card-bolted:hover {
+  box-shadow: var(--shadow-floating);
+  transform: translateY(-2px);
+}
+
+.input-recessed {
+  box-shadow: var(--shadow-recessed);
+  background-color: var(--color-chassis);
+  outline: none;
+  transition: box-shadow 200ms ease;
+  border: none;
+}
+.input-recessed:focus {
+  box-shadow: var(--shadow-recessed), 0 0 0 2px var(--color-accent);
+}
+
+.select-recessed {
+  box-shadow: var(--shadow-recessed);
+  background-color: var(--color-chassis);
+  outline: none;
+  transition: box-shadow 200ms ease;
+  border: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+.select-recessed:focus {
+  box-shadow: var(--shadow-recessed), 0 0 0 2px var(--color-accent);
+}
+
+.screw {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(0,0,0,0.15) 1px, transparent 2px),
+              linear-gradient(45deg, transparent 45%, rgba(0,0,0,0.2) 48%, rgba(0,0,0,0.2) 52%, transparent 55%),
+              radial-gradient(circle at center, #d1d9e6 2px, #babecc 4px, transparent 5px);
+  box-shadow: inset 1px 1px 2px rgba(255,255,255,0.8), inset -1px -1px 2px rgba(0,0,0,0.15);
+  position: absolute;
+}
+
+.vent-slot {
+  width: 3px;
+  height: 20px;
+  border-radius: 9999px;
+  background-color: #d1d9e6;
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.15), inset -1px -1px 2px rgba(255,255,255,0.6);
+}
+
+.led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.led-green {
+  box-shadow: 0 0 6px 1px rgba(34, 197, 94, 0.7);
+  background-color: #22c55e;
+}
+.led-red {
+  box-shadow: 0 0 6px 1px rgba(255, 71, 87, 0.7);
+  background-color: #ff4757;
+}
+.led-amber {
+  box-shadow: 0 0 6px 1px rgba(255, 165, 2, 0.7);
+  background-color: #ffa502;
 }

@@ -219,7 +219,7 @@ export function AuditPage() {
 
       {!isTabLoading && displayCycles.length === 0 && (
         <EmptyState
-          icon="🔍"
+          icon="magnifying-glass"
           title={activeTab === 'my-assignments' ? 'No assignments' : 'No audit cycles'}
           description={activeTab === 'my-assignments' ? "You haven't been assigned to any audit cycles yet." : "Create a cycle to start verifying assets against their expected state."}
         />

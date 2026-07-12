@@ -1,14 +1,29 @@
 import type { HTMLAttributes } from 'react';
 import clsx from 'clsx';
 
-export function Card({ className, ...rest }: HTMLAttributes<HTMLDivElement>) {
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  /** Show decorative screw hardware details in corners. */
+  bolted?: boolean;
+}
+
+export function Card({ bolted = true, className, children, ...rest }: CardProps) {
   return (
     <div
       className={clsx(
-        'rounded-2xl border border-ink-200/70 bg-white p-6 shadow-sm shadow-ink-900/3 dark:border-ink-800 dark:bg-ink-900',
+        'card-bolted rounded-2xl bg-chassis p-6 relative',
         className,
       )}
       {...rest}
-    />
+    >
+      {bolted && (
+        <>
+          <span className="screw top-3 left-3 opacity-40" />
+          <span className="screw top-3 right-3 opacity-40" />
+          <span className="screw bottom-3 left-3 opacity-40" />
+          <span className="screw bottom-3 right-3 opacity-40" />
+        </>
+      )}
+      {children}
+    </div>
   );
 }

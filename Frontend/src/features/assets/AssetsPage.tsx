@@ -207,7 +207,7 @@ export function AssetsPage() {
 
       {!isLoading && assets.length === 0 && (
         <EmptyState
-          icon="📦"
+          icon="package"
           title="No assets found"
           description={search || statusFilter || categoryFilter ? 'Try clearing your filters.' : 'Register your first asset to start tracking it through its lifecycle.'}
           action={!search && !statusFilter && !categoryFilter ? <Button onClick={() => setShowCreate(true)}>Register Asset</Button> : undefined}

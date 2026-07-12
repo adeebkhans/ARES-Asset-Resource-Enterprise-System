@@ -77,7 +77,7 @@ export function NotificationsPage() {
       {isLoading && <p className="text-sm text-ink-500">Loading…</p>}
 
       {!isLoading && notifications.length === 0 && (
-        <EmptyState icon="🔔" title="All quiet" description="You'll see updates from Maintenance, Audits, and Approvals here." />
+        <EmptyState icon="bell" title="All quiet" description="You'll see updates from Maintenance, Audits, and Approvals here." />
       )}
 
       {notifications.length > 0 && (

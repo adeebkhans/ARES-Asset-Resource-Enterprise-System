@@ -67,7 +67,7 @@ export function CategoriesTab() {
       {isLoading && <p className="text-sm text-ink-500">Loading...</p>}
 
       {!isLoading && categories.length === 0 && (
-        <EmptyState icon="🏷️" title="No categories yet" description="Create a category to start registering assets under it." action={<Button onClick={() => setShowCreate(true)}>Add Category</Button>} />
+        <EmptyState icon="tag" title="No categories yet" description="Create a category to start registering assets under it." action={<Button onClick={() => setShowCreate(true)}>Add Category</Button>} />
       )}
 
       {categories.length > 0 && (
