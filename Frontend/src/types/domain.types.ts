@@ -83,3 +83,93 @@ export interface ActivityLog {
   metadata: Record<string, unknown>;
   timestamp: string;
 }
+
+// ---------------------------------------------------------------------------
+// Phase 3 — Maintenance
+// ---------------------------------------------------------------------------
+
+export type MaintenanceStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'IN_PROGRESS' | 'RESOLVED';
+export type MaintenancePriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+
+export interface MaintenanceRequest {
+  id: string;
+  orgId: string;
+  assetId: string;
+  raisedById: string;
+  issueDescription: string;
+  priority: MaintenancePriority;
+  photos: string[];
+  technicianName: string | null;
+  status: MaintenanceStatus;
+  resolvedAt: string | null;
+  resolutionNotes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  asset?: { id: string; assetTag: string; name: string } | null;
+  raisedBy?: { id: string; name: string; email: string } | null;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 3 — Audits
+// ---------------------------------------------------------------------------
+
+export type AuditCycleStatus = 'PLANNED' | 'IN_PROGRESS' | 'CLOSED';
+export type AuditResult = 'VERIFIED' | 'MISSING' | 'DAMAGED';
+
+export interface AuditCycle {
+  id: string;
+  orgId: string;
+  scopeDepartmentId: string | null;
+  scopeLocation: string | null;
+  startDate: string;
+  endDate: string;
+  status: AuditCycleStatus;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  scopeDepartment?: { id: string; name: string } | null;
+  creator?: { id: string; name: string } | null;
+  assignments?: { id: string; auditor: { id: string; name: string } }[];
+  records?: AuditRecord[];
+  _count?: { records: number; assignments: number };
+}
+
+export interface AuditRecord {
+  id: string;
+  auditCycleId: string;
+  assetId: string;
+  result: AuditResult;
+  notes: string | null;
+  auditedById: string;
+  auditedAt: string;
+  asset?: { id: string; assetTag: string; name: string; location: string | null } | null;
+  auditedBy?: { id: string; name: string } | null;
+}
+
+export interface DiscrepancyReport {
+  id: string;
+  auditCycleId: string;
+  generatedAt: string;
+  itemCount: number;
+  summary: {
+    missing?: { assetId: string; assetTag: string; name: string; location: string | null }[];
+    damaged?: { assetId: string; assetTag: string; name: string; location: string | null }[];
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Phase 3 — Notifications
+// ---------------------------------------------------------------------------
+
+export interface Notification {
+  id: string;
+  orgId: string;
+  userId: string;
+  type: string;
+  title: string;
+  message: string;
+  relatedEntityType: string | null;
+  relatedEntityId: string | null;
+  isRead: boolean;
+  createdAt: string;
+}
